@@ -6,17 +6,42 @@ from .database import db
 class Recording(db.Model):
     __tablename__ = 'recordings'
 
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid4()), unique=True, nullable=False)
-    user_id = db.Column(db.String(36), db.ForeignKey('users.user_id'), nullable=False)
+    id = db.Column(
+        db.String(36),
+        primary_key=True,
+        default=lambda: str(uuid4()),
+        unique=True, nullable=False
+    )
+    user_id = db.Column(
+        db.String(36),
+        db.ForeignKey('users.user_id'),
+        nullable=False
+    )
     audio_url = db.Column(db.Text, nullable=False)
     recorded_at = db.Column(db.DateTime(timezone=True), nullable=False)
     latitude = db.Column(db.Integer, nullable=False)
     longitude = db.Column(db.Integer, nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), server_default=func.current_timestamp(), nullable=False)
-    updated_at = db.Column(db.DateTime(timezone=True), server_default=func.current_timestamp(), onupdate=func.current_timestamp(), nullable=False)
+    created_at = db.Column(
+        db.DateTime(timezone=True),
+        server_default=func.current_timestamp(),
+        nullable=False
+    )
+    updated_at = db.Column(
+        db.DateTime(timezone=True),
+        server_default=func.current_timestamp(),
+        onupdate=func.current_timestamp(),
+        nullable=False
+    )
 
     @classmethod
-    def create_recording(cls, user_id, audio_url, recorded_at, latitude, longitude):
+    def create_recording(
+        cls,
+        user_id,
+        audio_url,
+        recorded_at,
+        latitude,
+        longitude
+    ):
         new_recording = cls(
             user_id=user_id,
             audio_url=audio_url,
@@ -40,7 +65,14 @@ class Recording(db.Model):
         return None
 
     @classmethod
-    def update_recording(cls, recording_id, audio_url=None, recorded_at=None, latitude=None, longitude=None):
+    def update_recording(
+        cls,
+        recording_id,
+        audio_url=None,
+        recorded_at=None,
+        latitude=None,
+        longitude=None
+    ):
         recording = cls.query.filter_by(id=recording_id).first()
         if recording:
             if audio_url is not None:

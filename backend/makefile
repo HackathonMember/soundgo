@@ -1,15 +1,17 @@
-up:
-	docker compose up -d
+all: build up
 build:
 	docker compose build --no-cache
+up:
+	docker compose up -d
+down:
+	docker compose down -v
+mysql:
+	docker compose exec mysql mysql -u user -p
 bash:
 	docker compose exec app bash -c "/bin/bash"
-clean:
-	docker compose down -v
-
 format:
 	docker compose exec app bash -c "flake8 ." | true
 	docker compose exec app bash -c "black ." | true
 	docker compose exec app bash -c "isort ." | true
 
-.PHONY: clean build up bash format
+.PHONY: all up down build mysql bash format

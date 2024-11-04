@@ -11,7 +11,7 @@ users_db = {}
 
 @user.route("/test", methods=["GET"])
 def test():
-    return 'hello world!'
+    return "hello world!"
 
 
 @user.route("/signup", methods=["POST"])

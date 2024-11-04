@@ -1,7 +1,6 @@
-from flask import Flask
-
-from controllers.user import user
 from controllers.recordings import recordings
+from controllers.user import user
+from flask import Flask
 
 app = Flask(__name__)
 

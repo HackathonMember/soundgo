@@ -15,7 +15,11 @@ class Session(db.Model):
         unique=True,
         nullable=False,
     )
-    user_id = db.Column(db.String(36), db.ForeignKey("users.user_id"), nullable=False)
+    user_id = db.Column(
+        db.String(36),
+        db.ForeignKey("users.user_id"),
+        nullable=False
+    )
     created_at = db.Column(
         db.DateTime(timezone=True), server_default=func.now(), nullable=False
     )

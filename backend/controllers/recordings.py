@@ -1,16 +1,9 @@
 import uuid
 
-from flask import Blueprint, Flask, jsonify, render_template, request
+from flask import Blueprint, jsonify, request
 
 # from mw.prj import parse, search_prj, get_prj, create_prj, update_prj
 
-
-# fixme
-def aiueo():
-    return "hello world"
-
-
-aiueo()
 
 recordings = Blueprint("recordings", __name__, url_prefix="/recordings")
 

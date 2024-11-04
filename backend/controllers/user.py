@@ -13,6 +13,7 @@ users_db = {}
 def test():
     return 'hello world!'
 
+
 @user.route("/signup", methods=["POST"])
 def signup():
     data = request.get_json()

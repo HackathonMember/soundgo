@@ -15,7 +15,7 @@ recordings_db = {}
 def create_recording():
     data = request.form
     audio = request.files["audio"]
-    date_recorded = data.get("date_recorded")
+    date_recording = data.get("date_recording")
     latitude = data.get("latitude")
     longitude = data.get("longitude")
 
@@ -23,7 +23,7 @@ def create_recording():
     recordings_db[recording_id] = {
         "id": recording_id,
         "audio": audio.read(),  # 実際の処理ではファイルを保存する必要あり
-        "date_recorded": date_recorded,
+        "date_recording": date_recording,
         "latitude": latitude,
         "longitude": longitude,
     }
@@ -49,7 +49,9 @@ def update_recording(id):
         recording["audio"] = request.files[
             "audio"
         ].read()  # 実際の処理ではファイルを保存する必要あり
-    recording["date_recorded"] = data.get("date_recorded", recording["date_recorded"])
+    recording["date_recording"] = data.get(
+        "date_recording", recording["date_recording"]
+        )
     recording["latitude"] = data.get("latitude", recording["latitude"])
     recording["longitude"] = data.get("longitude", recording["longitude"])
 

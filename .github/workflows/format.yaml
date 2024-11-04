@@ -10,17 +10,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
-        run: |
-          pip install -y flake8 black isort
-          git config user.name github-actions
-          git config user.email github-actions@github.com
       - name: Format Python Code
         run: |
+          pip install -y flake8 black isort
           flask8 .
           isort .
           black .
       - name: Commit changes
+          git config user.name github-actions
+          git config user.email github-actions@github.com
           git add .
           git commit -m "Format Python Code" | true
           git push 2> /dev/null

@@ -1,35 +1,37 @@
 from uuid import uuid4
+
 from sqlalchemy import func
 from sqlalchemy.orm import relationship
+
 from .database import db
 
 
 class User(db.Model):
-    __tablename__ = 'users'
+    __tablename__ = "users"
 
     user_id = db.Column(
         db.String(36),
         primary_key=True,
         default=lambda: str(uuid4()),
         unique=True,
-        nullable=False
+        nullable=False,
     )
     username = db.Column(db.String(50), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     created_at = db.Column(
         db.TIMESTAMP(timezone=True),
         server_default=func.current_timestamp(),
-        nullable=False
+        nullable=False,
     )
     updated_at = db.Column(
         db.TIMESTAMP(timezone=True),
         server_default=func.current_timestamp(),
-        nullable=False
+        nullable=False,
     )
 
     # リレーションシップ
-    sessions = relationship('sessions', backref='users', lazy=True)
-    recordings = relationship('recordings', backref='users', lazy=True)
+    sessions = relationship("sessions", backref="users", lazy=True)
+    recordings = relationship("recordings", backref="users", lazy=True)
 
     @classmethod
     def create_new_user(cls, username, password_hash):
@@ -63,6 +65,4 @@ class User(db.Model):
             return True
         return False
 
-    __table_args__ = (
-        db.Index('idx_users_username', 'username'),
-    )
+    __table_args__ = (db.Index("idx_users_username", "username"),)

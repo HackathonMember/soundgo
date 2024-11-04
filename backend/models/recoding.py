@@ -1,22 +1,21 @@
 from uuid import uuid4
+
 from sqlalchemy import func
+
 from .database import db
 
 
 class Recording(db.Model):
-    __tablename__ = 'recordings'
+    __tablename__ = "recordings"
 
     id = db.Column(
         db.String(36),
         primary_key=True,
         default=lambda: str(uuid4()),
-        unique=True, nullable=False
+        unique=True,
+        nullable=False,
     )
-    user_id = db.Column(
-        db.String(36),
-        db.ForeignKey('users.user_id'),
-        nullable=False
-    )
+    user_id = db.Column(db.String(36), db.ForeignKey("users.user_id"), nullable=False)
     audio_url = db.Column(db.Text, nullable=False)
     recorded_at = db.Column(db.DateTime(timezone=True), nullable=False)
     latitude = db.Column(db.Integer, nullable=False)
@@ -24,30 +23,23 @@ class Recording(db.Model):
     created_at = db.Column(
         db.DateTime(timezone=True),
         server_default=func.current_timestamp(),
-        nullable=False
+        nullable=False,
     )
     updated_at = db.Column(
         db.DateTime(timezone=True),
         server_default=func.current_timestamp(),
         onupdate=func.current_timestamp(),
-        nullable=False
+        nullable=False,
     )
 
     @classmethod
-    def create_recording(
-        cls,
-        user_id,
-        audio_url,
-        recorded_at,
-        latitude,
-        longitude
-    ):
+    def create_recording(cls, user_id, audio_url, recorded_at, latitude, longitude):
         new_recording = cls(
             user_id=user_id,
             audio_url=audio_url,
             recorded_at=recorded_at,
             latitude=latitude,
-            longitude=longitude
+            longitude=longitude,
         )
         db.session.add(new_recording)
         db.session.commit()
@@ -71,7 +63,7 @@ class Recording(db.Model):
         audio_url=None,
         recorded_at=None,
         latitude=None,
-        longitude=None
+        longitude=None,
     ):
         recording = cls.query.filter_by(id=recording_id).first()
         if recording:
@@ -97,6 +89,6 @@ class Recording(db.Model):
         return False
 
     __table_args__ = (
-        db.Index('idx_recordings_user_id', 'user_id'),
-        db.Index('idx_recordings_recorded_at', 'recorded_at'),
+        db.Index("idx_recordings_user_id", "user_id"),
+        db.Index("idx_recordings_recorded_at", "recorded_at"),
     )

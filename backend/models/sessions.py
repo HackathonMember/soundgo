@@ -1,36 +1,29 @@
 from uuid import uuid4
+
 from sqlalchemy.sql import func
+
 from .database import db
 
 
 class Session(db.Model):
-    __tablename__ = 'sessions'
+    __tablename__ = "sessions"
 
     session_id = db.Column(
         db.String(36),
         primary_key=True,
         default=lambda: str(uuid4()),
         unique=True,
-        nullable=False
+        nullable=False,
     )
-    user_id = db.Column(
-        db.String(36),
-        db.ForeignKey('users.user_id'),
-        nullable=False
-    )
+    user_id = db.Column(db.String(36), db.ForeignKey("users.user_id"), nullable=False)
     created_at = db.Column(
-        db.DateTime(timezone=True),
-        server_default=func.now(),
-        nullable=False
+        db.DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
 
     @classmethod
     def create_session(cls, user_id, expires_at):
-        new_session = cls(
-            user_id=user_id,
-            expires_at=expires_at
-        )
+        new_session = cls(user_id=user_id, expires_at=expires_at)
         db.session.add(new_session)
         db.session.commit()
         return new_session
@@ -66,6 +59,6 @@ class Session(db.Model):
         return False
 
     __table_args__ = (
-        db.Index('idx_sessions_user_id', 'user_id'),
-        db.Index('idx_sessions_expires_at', 'expires_at'),
+        db.Index("idx_sessions_user_id", "user_id"),
+        db.Index("idx_sessions_expires_at", "expires_at"),
     )

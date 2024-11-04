@@ -1,11 +1,6 @@
 from .database import db
-from .user import User
 from .recoding import Recording
 from .sessions import Session
+from .user import User
 
-__all__ = [
-    db,
-    User,
-    Recording,
-    Session
-]
+__all__ = [db, User, Recording, Session]

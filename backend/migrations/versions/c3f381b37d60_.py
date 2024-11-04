@@ -73,11 +73,7 @@ def upgrade():
         batch_op.create_index(
             "idx_recordings_recorded_at", ["recorded_at"], unique=False
         )
-        batch_op.create_index(
-            "idx_recordings_user_id",
-            ["user_id"],
-            unique=False
-        )
+        batch_op.create_index("idx_recordings_user_id", ["user_id"], unique=False)
 
     op.create_table(
         "sessions",
@@ -98,16 +94,8 @@ def upgrade():
         sa.UniqueConstraint("session_id"),
     )
     with op.batch_alter_table("sessions", schema=None) as batch_op:
-        batch_op.create_index(
-            "idx_sessions_expires_at",
-            ["expires_at"],
-            unique=False
-        )
-        batch_op.create_index(
-            "idx_sessions_user_id",
-            ["user_id"],
-            unique=False
-        )
+        batch_op.create_index("idx_sessions_expires_at", ["expires_at"], unique=False)
+        batch_op.create_index("idx_sessions_user_id", ["user_id"], unique=False)
 
     # ### end Alembic commands ###
 

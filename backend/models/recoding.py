@@ -15,11 +15,7 @@ class Recording(db.Model):
         unique=True,
         nullable=False,
     )
-    user_id = db.Column(
-        db.String(36),
-        db.ForeignKey("users.user_id"),
-        nullable=False
-    )
+    user_id = db.Column(db.String(36), db.ForeignKey("users.user_id"), nullable=False)
     audio_url = db.Column(db.Text, nullable=False)
     recorded_at = db.Column(db.DateTime(timezone=True), nullable=False)
     latitude = db.Column(db.Integer, nullable=False)
@@ -37,14 +33,7 @@ class Recording(db.Model):
     )
 
     @classmethod
-    def create_recording(
-        cls,
-        user_id,
-        audio_url,
-        recorded_at,
-        latitude,
-        longitude
-    ):
+    def create_recording(cls, user_id, audio_url, recorded_at, latitude, longitude):
         new_recording = cls(
             user_id=user_id,
             audio_url=audio_url,

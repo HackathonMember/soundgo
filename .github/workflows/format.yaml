@@ -27,7 +27,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8 black isort
       - name: flake8
-        run: flake8 -r .
+        run: flake8 .
       - name: black
         run: black .
       - name: isort

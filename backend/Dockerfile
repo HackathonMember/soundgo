@@ -1,0 +1,31 @@
+# ベースイメージを指定
+FROM python:3.10
+
+# 作業ディレクトリを設定
+WORKDIR /app
+
+# mysql
+RUN apt-get update && apt-get install -y default-mysql-client libgl1-mesa-glx && rm -rf /var/cache/apk/*
+
+# Poetryをインストール
+RUN curl -sSL https://install.python-poetry.org | python3 - && \
+    echo "export PATH=/root/.local/bin:$PATH" >> ~/.bashrc && \
+    export PATH="/root/.local/bin:$PATH"
+
+# Poetryの環境変数設定（仮想環境の設定を無効化）
+ENV POETRY_VIRTUALENVS_CREATE=false
+ENV PATH="/root/.local/bin:$PATH"
+
+# degugモードを設定
+ENV FLASK_ENV=development
+
+# 必要なファイルをコピー
+COPY pyproject.toml poetry.lock ./
+
+# Poetryで依存関係をインストール
+RUN poetry install
+
+# Flaskアプリケーションのコードをコピー
+COPY . .
+
+# CMD ["flask", "run", "--host=0.0.0.0"]

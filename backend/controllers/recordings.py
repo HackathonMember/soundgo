@@ -51,7 +51,7 @@ def update_recording(id):
         ].read()  # 実際の処理ではファイルを保存する必要あり
     recording["date_recording"] = data.get(
         "date_recording", recording["date_recording"]
-        )
+    )
     recording["latitude"] = data.get("latitude", recording["latitude"])
     recording["longitude"] = data.get("longitude", recording["longitude"])
 

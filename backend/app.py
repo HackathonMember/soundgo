@@ -1,9 +1,9 @@
 from flask import Flask
 
-app = Flask(__name__)
-
 from controllers.user import user
 from controllers.recordings import recordings
+
+app = Flask(__name__)
 
 app.register_blueprint(user)
 app.register_blueprint(recordings)

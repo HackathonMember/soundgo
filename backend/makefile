@@ -7,4 +7,9 @@ bash:
 clean:
 	docker compose down -v
 
-.PHONY: clean build up bash
+format:
+	docker compose exec app bash -c "flake8 ." | true
+	docker compose exec app bash -c "black ." | true
+	docker compose exec app bash -c "isort ." | true
+
+.PHONY: clean build up bash format

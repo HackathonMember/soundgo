@@ -8,6 +8,6 @@ app = Flask(__name__)
 # app.register_blueprint(top)
 # app.register_blueprint(prj)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.debug = True
-    app.run(host='127.0.0.1',port=8080)
+    app.run(host="127.0.0.1", port=8080)

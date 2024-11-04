@@ -12,4 +12,4 @@ format:
 	docker compose exec app bash -c "black ." | true
 	docker compose exec app bash -c "isort ." | true
 
-.PHONY: clean build up bash
+.PHONY: clean build up bash format

@@ -6,7 +6,8 @@ bash:
 	docker compose exec app bash -c "/bin/bash"
 clean:
 	docker compose down -v
-
+mysql:
+	docker compose exec mysql mysql -u user -p
 format:
 	docker compose exec app bash -c "flake8 ." | true
 	docker compose exec app bash -c "black ." | true

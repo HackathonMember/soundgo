@@ -1,0 +1,152 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  rspec:
+    uses: ./.github/workflows/ci.yml
+    secrets:
+      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+      CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+  deploy:
+    needs: rspec
+    runs-on: ubuntu-latest
+    name: Deploy
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
+          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_ARN }}
+          role-duration-seconds: 1200
+
+      - name: Setup Python 3.7 for awscli
+        uses: actions/setup-python@v1
+        with:
+          version: "3.7"
+          architecture: "x64"
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY_NAME: ${{ secrets.ECR_REPOSITORY_NAME }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./docker/nginx/dev_server/Dockerfile ./docker/nginx/dev_server
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition soundgo-prod --query taskDefinition > app-task-definition.json
+          aws ecs describe-task-definition --task-definition soundgo-prod-worker --query taskDefinition > worker-task-definition.json
+          aws ecs describe-task-definition --task-definition soundgo-prod-migrate --query taskDefinition > migrate-task-definition.json
+
+      - name: Render Amazon ECS app task definition for web container
+        id: render-web-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: app-task-definition.json
+          container-name: soundgo-prod-web
+          image: ${{ steps.build-image-web.outputs.image }}
+
+      - name: Render Amazon ECS app task definition with app container
+        id: render-app-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-web-container.outputs.task-definition }}
+          container-name: soundgo-prod-app
+          image: ${{ steps.build-image-app.outputs.image }}
+
+      - name: Render Amazon ECS worker task definition with app container
+        id: render-worker-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: worker-task-definition.json
+          container-name: soundgo-prod-worker
+          image: ${{ steps.build-image-app.outputs.image }}
+
+      - name: Render Amazon ECS migrate task definition with app container
+        id: render-migrate-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: migrate-task-definition.json
+          container-name: soundgo-prod-app-migrate
+          image: ${{ steps.build-image-app.outputs.image }}
+
+      # 7. タスク定義の実行
+      # 新しいimageを紐付けたmigrate用のタスク定義の新しいRevisionを明示的に作成する必要がある
+      - name: Revision to Amazon ECS migrate task
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-migrate-container.outputs.task-definition }}
+          cluster: soundgo-prod
+
+      # 最新Revisionのmigrate用のタスク定義でmigrateを実行する
+      - name: Deploy to Amazon ECS migrate service
+        env:
+          CLUSTER_ARN: ${{ secrets.DEV_CLUSTER_ARN }}
+          ECS_SUBNET_ID: ${{ secrets.DEV_ECS_SUBNET_ID }}
+          ECS_SECURITY_GROUP: ${{ secrets.DEV_ECS_SECURITY_GROUP }}
+        run: |
+          LATEST_REVISION=$(aws ecs list-task-definitions | jq -r '.taskDefinitionArns[]' | grep soundgo-prod-migrate: | tail -n1)
+          aws ecs run-task --launch-type EC2 --cluster $CLUSTER_ARN --task-definition $LATEST_REVISION --network-configuration "awsvpcConfiguration={subnets=[$ECS_SUBNET_ID],securityGroups=[$ECS_SECURITY_GROUP],assignPublicIp=DISABLED}" > run-task.log
+          TASK_ARN=$(jq -r '.tasks[0].taskArn' run-task.log)
+          aws ecs wait tasks-stopped --cluster $CLUSTER_ARN --tasks $TASK_ARN
+          TASK_DEFINITION_ARN=$(aws ecs describe-tasks --cluster soundgo-prod --tasks $TASK_ARN --query "tasks[].taskDefinitionArn" --output text)
+          echo ${TASK_DEFINITION_ARN}
+
+      # 最新Revisionのapp用のタスク定義でappコンテナをデプロイする
+      - name: Deploy to Amazon ECS app service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-app-container.outputs.task-definition }}
+          service: soundgo-prod
+          cluster: soundgo-prod
+
+      # 最新Revisionのworker用のタスク定義でworkerコンテナをデプロイする
+      - name: Deploy to Amazon ECS worker service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-worker-container.outputs.task-definition }}
+          service: soundgo-prod-worker
+          cluster: soundgo-prod
+
+      # 8. 実行結果をslackに通知
+      - name: Slack Notification on Success
+        if: success()
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_USERNAME: GitHUb Actions
+          SLACK_TITLE: Workflow Succeeded
+          SLACK_ICON: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
+          SLACK_MESSAGE: "dev環境へのデプロイに成功しました。Run number : #${{ github.run_number }}"
+          SLACK_COLOR: good
+
+      - name: Slack Notification on Failure
+        uses: rtCamp/action-slack-notify@v2.0.2
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_USERNAME: GitHUb Actions
+          SLACK_TITLE: Workflow failed
+          SLACK_ICON: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
+          SLACK_MESSAGE: "dev環境へのデプロイに失敗しました。Run number : #${{ github.run_number }}"
+          SLACK_COLOR: danger

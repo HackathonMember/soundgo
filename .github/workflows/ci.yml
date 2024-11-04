@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_call:
+    # secrets:
+    # ここで必要なシークレットキーt記なのを呼ぶ こんな感じ
+    #RAILS_MASTER_KEY:
+    #required: true
+
+jobs:
+  rspec:
+    runs-on: ubuntu-latest
+    # コミットメッセージに特定の文字列を入れるとCIをスキップできる
+    if: ${{ !contains(github.event.commits.*.message, '[skip ci]') }}
+
+    env:
+      FRASK_ENV: test
+      DB_HOST: 127.0.0.1
+      DB_PORT: 33060
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+      AWS_ACCESS_KEY_ID: AWS_ACCESS_KEY_ID # AWSアクセスキーを使ったアクセスが必要なテストがあれば適当な文字列でテスト環境内のみアクセスできるようにしておく
+      AWS_SECRET_ACCESS_KEY: AWS_SECRET_ACCESS_KEY # AWSアクセスキーを使ったアクセスが必要なテストがあれば適当な文字列でテスト環境内のみアクセスできるようにしておく
+      AWS_DEFAULT_REGION: ap-northeast-1
+      AWS_DEFAULT_OUTPUT: json
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+          BIND_ADDRESS: 0.0.0.0
+        ports:
+          - 33060:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      # pumaのimageをbuild
+      - uses: actions/checkout@v2
+      - name: Check ./docker/puma/prod/Dockerfile
+        uses: hadolint/hadolint-action@v1.5.0
+        with:
+          dockerfile: ./docker/puma/prod/Dockerfile
+      # nginxのimageをbuild
+      - name: Check ./docker/nginx/prod/Dockerfile
+        uses: hadolint/hadolint-action@v1.5.0
+        with:
+          dockerfile: ./docker/nginx/prod/Dockerfile
+      - name: Set up Ruby 2.7
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.7.3
+          bundler-cache: true
+      - name: Setup DB
+        run: |
+          sudo service mysql start
+          bundle exec rails db:prepare
+      # S3のモックを使いたいためminioを導入
+      - name: Setup minio
+        env:
+          AWS_ACCESS_KEY_ID: minio_access_key
+          AWS_SECRET_ACCESS_KEY: minio_secret_key
+          AWS_EC2_METADATA_DISABLED: true
+        run: |
+          docker run -d -p 9000:9000 --name minio \
+                     -e "MINIO_ACCESS_KEY=minio_access_key" \
+                     -e "MINIO_SECRET_KEY=minio_secret_key" \
+                     -v /tmp/data:/data \
+                     -v /tmp/config:/root/.minio \
+                     minio/minio server /data
+          aws --endpoint-url http://localhost:9000/ s3 mb s3://<bucket名>
+      # rubocopを回す
+      - name: Run RuboCop
+        run: bundle exec rubocop
+      # Code Climateにデータを送っている（入れてなければ必要なし）
+      - name: Setup Code Climate test-reporter
+        run: |
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
+          ./cc-test-reporter before-build
+      # テストを回す(並列実行用のgem(parallel_tests)を入れている。入れてなければ普通にbundle exec rspecコマンドのみで良い)
+      - name: Run RSpec
+        env:
+          AWS_S3_ENDPOINT: http://127.0.0.1:9000
+        run: |
+          ./cc-test-reporter before-build
+          bundle exec rake parallel:create
+          bundle exec rake parallel:prepare
+          bundle exec rake parallel:spec
+          ./cc-test-reporter after-build

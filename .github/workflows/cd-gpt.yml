@@ -1,0 +1,148 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          pytest
+
+  deploy:
+    needs: [test]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set environment variables
+      - name: Set environment variables
+        run: |
+          echo "TARGET=dev" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=my-flask-app" >> $GITHUB_ENV
+          echo "SERVICE_NAME=my-flask-app" >> $GITHUB_ENV
+          echo "ECR_REPOSITORY=my-flask-app" >> $GITHUB_ENV
+          echo "CONTAINER_NAME=my-flask-app" >> $GITHUB_ENV
+
+      # Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
+
+      # Install AWS CLI v2
+      - name: Install AWS CLI v2
+        uses: aws-actions/setup-aws-cli@v2
+
+      # Login to Amazon ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # Build, tag, and push Docker image to Amazon ECR
+      - name: Build, tag, and push Docker image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      # Download the current task definition
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition ${{ env.SERVICE_NAME }} --query taskDefinition > task-definition.json
+
+      # Render the new task definition
+      - name: Render Amazon ECS task definition
+        id: render-task-definition
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      # Register the new task definition
+      - name: Register task definition
+        id: register-task-definition
+        run: |
+          TASK_DEFINITION_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://${{ steps.render-task-definition.outputs.task-definition }} \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+          echo "::set-output name=task-definition-arn::$TASK_DEFINITION_ARN"
+
+      # Update the ECS service with the new task definition
+      - name: Update ECS service
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.CLUSTER_NAME }} \
+            --service ${{ env.SERVICE_NAME }} \
+            --task-definition ${{ steps.register-task-definition.outputs.task-definition-arn }}
+
+      # Wait for the service to stabilize
+      - name: Wait for service stability
+        run: |
+          aws ecs wait services-stable \
+            --cluster ${{ env.CLUSTER_NAME }} \
+            --services ${{ env.SERVICE_NAME }}
+
+      # Run database migrations
+      - name: Run database migrations
+        env:
+          ECS_SUBNET_ID: ${{ secrets.ECS_SUBNET_ID }}
+          ECS_SECURITY_GROUP: ${{ secrets.ECS_SECURITY_GROUP }}
+        run: |
+          aws ecs run-task \
+            --cluster ${{ env.CLUSTER_NAME }} \
+            --task-definition ${{ steps.register-task-definition.outputs.task-definition-arn }} \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[$ECS_SUBNET_ID],securityGroups=[$ECS_SECURITY_GROUP],assignPublicIp=DISABLED}" \
+            --overrides '{"containerOverrides": [{"name": "'${{ env.CONTAINER_NAME }}'", "command": ["flask", "db", "upgrade"]}]}'
+
+      # Slack Notification on Success
+      # - name: Slack Notification on Success
+      #   if: success()
+      #   uses: rtCamp/action-slack-notify@v2.0.2
+      #   env:
+      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+      #     SLACK_USERNAME: GitHub Actions
+      #     SLACK_TITLE: Workflow Succeeded
+      #     SLACK_ICON: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
+      #     SLACK_MESSAGE: "Deployment to dev environment succeeded. Run number: #${{ github.run_number }}"
+      #     SLACK_COLOR: good
+
+      # # Slack Notification on Failure
+      # - name: Slack Notification on Failure
+      #   if: failure()
+      #   uses: rtCamp/action-slack-notify@v2.0.2
+      #   env:
+      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+      #     SLACK_USERNAME: GitHub Actions
+      #     SLACK_TITLE: Workflow Failed
+      #     SLACK_ICON: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
+      #     SLACK_MESSAGE: "Deployment to dev environment failed. Run number: #${{ github.run_number }}"
+      #     SLACK_COLOR: danger

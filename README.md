@@ -22,3 +22,16 @@ make bash
 flask db migrate
 flask db upgrade
 ```
+
+#### appからmysqlへの接続確認
+```bash
+make bash
+apt install default-mysql-client
+mysql -h soundgo-mysql -u user -p
+# passwordを入力してください
+```
+
+#### mysqlへの接続
+```bash
+make mysql
+```

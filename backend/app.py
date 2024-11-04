@@ -1,6 +1,12 @@
 from flask import Flask
+from models.database import init_db
 
 app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    "mysql+pymysql://user:password@soundgo-mysql/SOUNDGO"
+)
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+init_db(app)
 
 # from route.top import top
 # from route.prj import prj

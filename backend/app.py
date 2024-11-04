@@ -2,11 +2,11 @@ from flask import Flask
 
 app = Flask(__name__)
 
-# from route.top import top
-# from route.prj import prj
+from controllers.user import user
+from controllers.recordings import recordings
 
-# app.register_blueprint(top)
-# app.register_blueprint(prj)
+app.register_blueprint(user)
+app.register_blueprint(recordings)
 
 if __name__ == "__main__":
     app.debug = True

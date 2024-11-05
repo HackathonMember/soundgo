@@ -1,11 +1,12 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from uuid import uuid4
 
+from sqlalchemy import text
 from sqlalchemy.sql import func
 
 from .database import db
 
-SESSION_DURATION = timedelta(days=7)  # セッションの有効期限
+SESSION_DURATION = text("INTERVAL 7 DAY")  # セッションの有効期限
 
 class Session(db.Model):
     __tablename__ = "sessions"
@@ -25,11 +26,10 @@ class Session(db.Model):
 
     @classmethod
     def create_session(cls, user_id):
-        expires_at = func.now() + SESSION_DURATION
-        new_session = cls(user_id=user_id, expires_at=expires_at)
+        new_session = cls(user_id=user_id, expires_at=func.now() + SESSION_DURATION)
         db.session.add(new_session)
         db.session.commit()
-        return new_session, expires_at
+        return new_session, new_session.expires_at
 
     @classmethod
     def get_session_by_id(cls, session_id):

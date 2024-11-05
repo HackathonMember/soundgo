@@ -8,8 +8,11 @@ services:
       - "8080:8080"
     volumes:
       - .:/app
+    environment:
+      - DEBUG=1
     networks:
       - soundgo-network
+    restart: always
 
   mysql:
     platform: linux/x86_64

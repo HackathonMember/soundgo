@@ -40,9 +40,12 @@ def signup():
 
         new_user = User.create_new_user(username, hashed_password)
 
-        new_session, expires_at = Session.create_session(user.user_id)
+        new_session, expires_at = Session.create_session(new_user.user_id)
         response = make_response(jsonify({'message': 'ユーザー登録が完了しました'}))
         response.set_cookie('session_id', new_session.session_id, httponly=True, secure=True, expires=expires_at)
+
+        return response
+
     except Exception as e:
         logger.error(e)
         return jsonify({"message": "エラーが発生しました"}), 500
@@ -66,5 +69,5 @@ def login():
         response.set_cookie('session_id', new_session.session_id, httponly=True, secure=True, expires=expires_at)
         return response, 200
     except Exception as e:
-        logger.error(e)
+        logger.error(f"[ERROR]: {e}")
         return jsonify({"message": "エラーが発生しました"}), 500

@@ -1,6 +1,8 @@
 from flask import Flask
+import logging
 
 from models.database import init_db
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = (

@@ -30,8 +30,8 @@ class User(db.Model):
     )
 
     # リレーションシップ
-    sessions = relationship("sessions", backref="users", lazy=True)
-    recordings = relationship("recordings", backref="users", lazy=True)
+    sessions = relationship("Session", backref="user", lazy=True)
+    recordings = relationship("Recording", backref="user", lazy=True)
 
     @classmethod
     def create_new_user(cls, username, password_hash):

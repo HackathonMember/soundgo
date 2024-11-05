@@ -7,6 +7,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = (
     "mysql+pymysql://user:password@soundgo-mysql/SOUNDGO"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.json.ensure_ascii = False
 init_db(app)
 
 from controllers.recordings import recordings

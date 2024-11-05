@@ -10,6 +10,7 @@ services:
       - .:/app
     environment:
       - DEBUG=1
+      - DATABASE_URL=mysql+pymysql://user:password@soundgo-mysql/SOUNDGO
     networks:
       - soundgo-network
     restart: always

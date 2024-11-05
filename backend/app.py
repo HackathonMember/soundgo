@@ -1,6 +1,8 @@
 import logging
-
 from flask import Flask
+
+from controllers.recordings import recordings
+from controllers.user import user
 
 from models.database import init_db
 
@@ -13,9 +15,6 @@ app.config["SQLALCHEMY_DATABASE_URI"] = (
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.json.ensure_ascii = False
 init_db(app)
-
-from controllers.recordings import recordings
-from controllers.user import user
 
 app.register_blueprint(user)
 app.register_blueprint(recordings)

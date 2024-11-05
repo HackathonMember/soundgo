@@ -1,3 +1,4 @@
+import os
 import logging
 
 from controllers.recordings import recordings
@@ -9,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    "mysql+pymysql://user:password@soundgo-mysql/SOUNDGO"
+    os.getenv("DATABASE_URL")
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.json.ensure_ascii = False

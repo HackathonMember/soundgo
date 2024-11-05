@@ -45,6 +45,10 @@ class User(db.Model):
         return cls.query.filter_by(user_id=user_id).first()
 
     @classmethod
+    def get_user_by_username(cls, username):
+        return cls.query.filter_by(username=username).first()
+
+    @classmethod
     def update_user(cls, user_id, username=None, password_hash=None):
         user = cls.query.filter_by(user_id=user_id).first()
         if user:

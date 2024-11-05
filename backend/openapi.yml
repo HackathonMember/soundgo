@@ -1,0 +1,205 @@
+openapi: 3.0.0
+info:
+  version: '1.0'
+  title: 録音管理API
+  description: ユーザー認証と録音管理を行うためのAPI
+servers:
+  - url: http://localhost:8080
+    description: ローカル開発環境
+paths:
+  /user/signup:
+    post:
+      summary: ユーザーのサインアップ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCredentials'
+      responses:
+        '201':
+          description: ユーザーが正常に作成されました
+        '400':
+          description: リクエストが不正です
+  /user/login:
+    post:
+      summary: ユーザーログイン
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCredentials'
+      responses:
+        '200':
+          description: ログイン成功
+          headers:
+            Session-ID:
+              schema:
+                type: string
+              description: セッションID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: 認証失敗
+  /recordings:
+    post:
+      summary: 録音の作成
+      security:
+        - SessionID: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NewRecording'
+      responses:
+        '201':
+          description: 録音が正常に作成されました
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordingMetadata'
+        '401':
+          description: 認証が必要です
+  /recordings/{id}:
+    get:
+      summary: 録音の取得
+      security:
+        - SessionID: []
+      parameters:
+        - $ref: '#/components/parameters/RecordingId'
+      responses:
+        '200':
+          description: 録音の音声データを取得しました
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: 認証が必要です
+        '404':
+          description: 録音が見つかりません
+    put:
+      summary: 録音の更新
+      security:
+        - SessionID: []
+      parameters:
+        - $ref: '#/components/parameters/RecordingId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateRecording'
+      responses:
+        '200':
+          description: 録音が正常に更新されました
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordingMetadata'
+        '401':
+          description: 認証が必要です
+        '404':
+          description: 録音が見つかりません
+    delete:
+      summary: 録音の削除
+      security:
+        - SessionID: []
+      parameters:
+        - $ref: '#/components/parameters/RecordingId'
+      responses:
+        '204':
+          description: 録音が正常に削除されました
+        '401':
+          description: 認証が必要です
+        '404':
+          description: 録音が見つかりません
+components:
+  securitySchemes:
+    SessionID:
+      type: apiKey
+      in: header
+      name: Session-ID
+      description: ログイン後に提供されるセッションID
+  parameters:
+    RecordingId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 録音のユニークな識別子
+  schemas:
+    UserCredentials:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+    User:
+      type: object
+      properties:
+        user_id:
+          type: string
+        username:
+          type: string
+      required:
+        - user_id
+        - username
+    NewRecording:
+      type: object
+      properties:
+        audio:
+          type: string
+          format: binary
+        date_recorded:
+          type: string
+          format: date-time
+        latitude:
+          type: integer
+        longitude:
+          type: integer
+      required:
+        - audio
+    UpdateRecording:
+      type: object
+      properties:
+        audio:
+          type: string
+          format: binary
+        date_recorded:
+          type: string
+          format: date-time
+        latitude:
+          type: integer
+        longitude:
+          type: integer
+    RecordingMetadata:
+      type: object
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        date_recorded:
+          type: string
+          format: date-time
+        latitude:
+          type: integer
+        longitude:
+          type: integer
+      required:
+        - id
+        - user_id
+        - date_recorded
+        - latitude
+        - longitude

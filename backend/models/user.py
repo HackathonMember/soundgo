@@ -30,8 +30,8 @@ class User(db.Model):
     )
 
     # リレーションシップ
-    sessions = relationship("sessions", backref="users", lazy=True)
-    recordings = relationship("recordings", backref="users", lazy=True)
+    sessions = relationship("Session", backref="user", lazy=True)
+    recordings = relationship("Recording", backref="user", lazy=True)
 
     @classmethod
     def create_new_user(cls, username, password_hash):
@@ -43,6 +43,10 @@ class User(db.Model):
     @classmethod
     def get_user_by_user_id(cls, user_id):
         return cls.query.filter_by(user_id=user_id).first()
+
+    @classmethod
+    def get_user_by_username(cls, username):
+        return cls.query.filter_by(username=username).first()
 
     @classmethod
     def update_user(cls, user_id, username=None, password_hash=None):

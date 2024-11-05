@@ -1,8 +1,11 @@
 from uuid import uuid4
 
+from sqlalchemy import text
 from sqlalchemy.sql import func
 
 from .database import db
+
+SESSION_DURATION = text("INTERVAL 7 DAY")  # セッションの有効期限
 
 
 class Session(db.Model):
@@ -22,11 +25,11 @@ class Session(db.Model):
     expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
 
     @classmethod
-    def create_session(cls, user_id, expires_at):
-        new_session = cls(user_id=user_id, expires_at=expires_at)
+    def create_session(cls, user_id):
+        new_session = cls(user_id=user_id, expires_at=func.now() + SESSION_DURATION)
         db.session.add(new_session)
         db.session.commit()
-        return new_session
+        return new_session, new_session.expires_at
 
     @classmethod
     def get_session_by_id(cls, session_id):
@@ -57,6 +60,17 @@ class Session(db.Model):
             db.session.commit()
             return True
         return False
+
+    @classmethod
+    def delete_sessions_by_user_id(cls, user_id):
+        cls.query.filter_by(user_id=user_id).delete()
+        db.session.commit()
+
+    @classmethod
+    def delete_expired_sessions(cls):
+        # FIXME: この処理は定期的に実行されるべきかも
+        cls.query.filter(cls.expires_at < func.now()).delete()
+        db.session.commit()
 
     __table_args__ = (
         db.Index("idx_sessions_user_id", "user_id"),

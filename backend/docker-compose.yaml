@@ -10,10 +10,12 @@ services:
       - .:/app
     environment:
       - DEBUG=1
+      - FLASK_ENV=development
       - DATABASE_URL=mysql+pymysql://user:password@soundgo-mysql/SOUNDGO
     networks:
       - soundgo-network
     restart: always
+    command: flask run --host=0.0.0.0 --port=8080
 
   mysql:
     platform: linux/x86_64

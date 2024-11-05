@@ -16,9 +16,6 @@ RUN curl -sSL https://install.python-poetry.org | python3 - && \
 ENV POETRY_VIRTUALENVS_CREATE=false
 ENV PATH="/root/.local/bin:$PATH"
 
-# degugモードを設定
-ENV FLASK_ENV=development
-
 # 必要なファイルをコピー
 COPY pyproject.toml poetry.lock ./
 
@@ -27,5 +24,3 @@ RUN poetry install
 
 # Flaskアプリケーションのコードをコピー
 COPY . .
-
-CMD ["flask", "run", "--host=0.0.0.0", "--port=8080"]

@@ -1,10 +1,11 @@
-from flask import Blueprint, jsonify, request, make_response
-from werkzeug.security import generate_password_hash
 from logging import getLogger
 
-from models import User, Session
-from controllers.utils.password import verify_password
+from flask import Blueprint, jsonify, make_response, request
+from werkzeug.security import generate_password_hash
+
 from controllers.utils.auth import login_required
+from controllers.utils.password import verify_password
+from models import Session, User
 
 logger = getLogger(__name__)
 
@@ -15,10 +16,12 @@ user = Blueprint("user", __name__, url_prefix="/user")
 def test():
     return "hello world!"
 
+
 @user.route("/auth-test", methods=["GET"])
 @login_required
 def auth_test():
     return "you are currently logged in!"
+
 
 @user.route("/signup", methods=["POST"])
 def signup():
@@ -36,13 +39,21 @@ def signup():
             return jsonify({"message": "このユーザー名は既に使用されています。"}), 400
 
         # パスワードハッシュ化
-        hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=16)
+        hashed_password = generate_password_hash(
+            password, method="pbkdf2:sha256", salt_length=16
+        )
 
         new_user = User.create_new_user(username, hashed_password)
 
         new_session, expires_at = Session.create_session(new_user.user_id)
-        response = make_response(jsonify({'message': 'ユーザー登録が完了しました'}))
-        response.set_cookie('session_id', new_session.session_id, httponly=True, secure=True, expires=expires_at)
+        response = make_response(jsonify({"message": "ユーザー登録が完了しました"}))
+        response.set_cookie(
+            "session_id",
+            new_session.session_id,
+            httponly=True,
+            secure=True,
+            expires=expires_at,
+        )
 
         return response
 
@@ -65,8 +76,14 @@ def login():
         # 既存のsessionを削除
         Session.delete_sessions_by_user_id(user.user_id)
         new_session, expires_at = Session.create_session(user.user_id)
-        response = make_response(jsonify({'message': 'ログインしました'}))
-        response.set_cookie('session_id', new_session.session_id, httponly=True, secure=True, expires=expires_at)
+        response = make_response(jsonify({"message": "ログインしました"}))
+        response.set_cookie(
+            "session_id",
+            new_session.session_id,
+            httponly=True,
+            secure=True,
+            expires=expires_at,
+        )
         return response, 200
     except Exception as e:
         logger.error(f"[ERROR]: {e}")

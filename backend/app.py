@@ -1,7 +1,9 @@
-from flask import Flask
 import logging
 
+from flask import Flask
+
 from models.database import init_db
+
 logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)

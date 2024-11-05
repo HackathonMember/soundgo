@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 from uuid import uuid4
 
 from sqlalchemy import text
@@ -7,6 +7,7 @@ from sqlalchemy.sql import func
 from .database import db
 
 SESSION_DURATION = text("INTERVAL 7 DAY")  # セッションの有効期限
+
 
 class Session(db.Model):
     __tablename__ = "sessions"

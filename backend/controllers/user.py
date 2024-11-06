@@ -2,7 +2,7 @@ from logging import getLogger
 
 from controllers.utils.auth import login_required
 from controllers.utils.password import verify_password
-from flask import Blueprint, jsonify, make_response, request
+from flask import Blueprint, g, jsonify, make_response, request
 from models import Session, User
 from werkzeug.security import generate_password_hash
 
@@ -83,6 +83,23 @@ def login():
             secure=True,
             expires=expires_at,
         )
+        return response, 200
+    except Exception as e:
+        logger.error(f"[ERROR]: {e}")
+        return jsonify({"message": "エラーが発生しました"}), 500
+
+
+@user.route("/logout", methods=["POST"])
+@login_required
+def logout():
+    try:
+        # 現在のユーザーのセッションを削除
+        Session.delete_sessions_by_user_id(g.user.user_id)
+
+        # クッキーの削除
+        response = make_response(jsonify({"message": "ログアウトしました"}))
+        response.delete_cookie("session_id")
+
         return response, 200
     except Exception as e:
         logger.error(f"[ERROR]: {e}")

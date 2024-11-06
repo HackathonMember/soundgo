@@ -70,11 +70,11 @@ jobs:
           image: latest
 
       # 9. Register new task definition
-      - name: Register new task definition
-        id: register-task-def
-        run: |
-          NEW_TASK_DEF=$(aws ecs register-task-definition --cli-input-json file://${{ steps.render-container.outputs.task-definition }} | jq -r '.taskDefinition.taskDefinitionArn')
-          echo "TASK_DEFINITION_ARN=$NEW_TASK_DEF" >> $GITHUB_ENV
+      # - name: Register new task definition
+      #   id: register-task-def
+      #   run: |
+      #     NEW_TASK_DEF=$(aws ecs register-task-definition --cli-input-json file://${{ steps.render-container.outputs.task-definition }} | jq -r '.taskDefinition.taskDefinitionArn')
+      #     echo "TASK_DEFINITION_ARN=$NEW_TASK_DEF" >> $GITHUB_ENV
 
       # 10. Run migration task
       - name: Run Migrations
@@ -82,7 +82,7 @@ jobs:
         uses: yyoshiki41/ecs-run-task-action@v0.0.5
         with:
           cluster: soundgo-cluster
-          task-definition: ${{ steps.register-task-def.outputs.task-definition }}
+          task-definition: ${{ steps.render-container.outputs.task-definition }}
           task-definition-family: soundgo
           launch-type: "EC2"
           subnets: '["subnet-0a56214a722366ddd, subnet-0f3b388677b3be3fc, subnet-0138e1f7d9120a3c5"]'

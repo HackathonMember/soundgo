@@ -87,7 +87,7 @@ jobs:
           launch-type: "EC2"
           subnets: '["subnet-0a56214a722366ddd, subnet-0f3b388677b3be3fc, subnet-0138e1f7d9120a3c5"]'
           security-groups: '["sg-012ca51c550450a5d"]'
-          container-name: soundgo-cluster
+          container-name: soundgo
           command: '["sh", "-c", "flask db upgrade"]'
 
       # 11. Deploy to Amazon ECS service

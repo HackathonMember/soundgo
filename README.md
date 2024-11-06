@@ -34,4 +34,15 @@ mysql -h soundgo-mysql -u user -p
 #### mysqlへの接続
 ```bash
 make mysql
+# passwordを入力してください
+```
+
+##### テスト
+```bash
+make bash
+## コンテナに入るはず
+# s3を作成
+bash test_utils/create_s3.sh
+# テスト実行
+pytest tests/aws/test_s3.py
 ```

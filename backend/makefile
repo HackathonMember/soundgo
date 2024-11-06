@@ -10,9 +10,9 @@ mysql:
 bash:
 	docker compose exec app bash -c "/bin/bash"
 format:
-	docker compose exec app bash -c "flake8 ."
 	docker compose exec app bash -c "black ."
 	docker compose exec app bash -c "isort ."
+	docker compose exec app bash -c "flake8 ."
 migrate:
 	docker compose exec app bash -c "flask db migrate" | true
 	docker compose exec app bash -c "flask db upgrade" | true

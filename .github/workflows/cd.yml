@@ -82,7 +82,7 @@ jobs:
         uses: yyoshiki41/ecs-run-task-action@v0.0.5
         with:
           cluster: soundgo-cluster
-          task-definition: soundgo
+          task-definition: ${{ steps.task-def.outputs.register-task-def }}
           task-definition-family: soundgo
           launch-type: "EC2"
           subnets: '["subnet-0a56214a722366ddd, subnet-0f3b388677b3be3fc, subnet-0138e1f7d9120a3c5"]'
@@ -96,4 +96,4 @@ jobs:
         with:
           task-definition: ${{ steps.render-container.outputs.task-definition }}
           service: soundgo
-          cluster: soundgo
+          cluster: soundgo-cluster

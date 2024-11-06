@@ -66,7 +66,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: task-definition.json
-          container-name: soundgo-cluster
+          container-name: soundgo
           image: latest
 
       # 9. Register new task definition

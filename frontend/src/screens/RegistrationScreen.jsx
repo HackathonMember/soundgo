@@ -22,8 +22,8 @@ const RegistrationScreen = ({ navigation, route }) => {
     setError("");
     setIsLoading(true);
 
-    // ホーム画面遷移確認のために一時的に追加
-    navigation.navigate("Home");
+    // 説明画面遷移確認のために一時的に追加
+    navigation.navigate("Explanation");
 
     // 基本的なバリデーション
     if (!name || !email || !password || !confirmPassword) {
@@ -122,7 +122,7 @@ const RegistrationScreen = ({ navigation, route }) => {
         <View style={styles.footer}>
           <Text style={styles.footerText}>
             すでにアカウントをお持ちですか？{" "}
-            <TouchableOpacity onPress={() => console.log("ログイン画面へ移動")}>
+            <TouchableOpacity onPress={() => navigation.navigate("Login")}>
               <Text style={styles.loginLink}>ログイン</Text>
             </TouchableOpacity>
           </Text>

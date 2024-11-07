@@ -79,7 +79,7 @@ jobs:
       # 10. Run migration task
       - name: Run Migrations
         id: run-task
-        uses: yyoshiki41/ecs-run-task-action@v0.0.5
+        uses: yyoshiki41/ecs-run-task-action@v0.0.9
         with:
           cluster: soundgo-cluster
           task-definition: ${{ steps.render-container.outputs.task-definition }}

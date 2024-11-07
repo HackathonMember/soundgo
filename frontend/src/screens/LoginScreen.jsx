@@ -24,29 +24,26 @@ const LoginScreen = ({ navigation }) => {
     // 注意書き画面遷移確認のために一時的に追加
     navigation.navigate("Caution");
 
-    // 基本的なバリデーション
     if (!email || !password) {
-      setError("メールアドレスとパスワードを入力してください。");
+      setError("Please enter your email and password.");
       setIsLoading(false);
       return;
     }
 
-    // 実際のログイン処理をここに実装します
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // ログイン処理のシミュレーション
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setIsLoading(false);
-      RNAlert.alert("ログイン成功", "正常にログインしました。", [
+      RNAlert.alert("Login Successful", "You have successfully logged in.", [
         { text: "OK", onPress: () => console.log("OK Pressed") },
       ]);
     } catch (err) {
-      setError("ログインに失敗しました。再度お試しください。");
+      setError("Login failed. Please try again.");
       setIsLoading(false);
     }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* 戻るボタン */}
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => navigation.navigate("LoginOrRegister")}
@@ -54,10 +51,8 @@ const LoginScreen = ({ navigation }) => {
         <FontAwesome name="arrow-left" size={24} color="#333" />
       </TouchableOpacity>
       <View style={styles.card}>
-        <Text style={styles.title}>ログイン</Text>
-        <Text style={styles.description}>
-          アカウントにログインしてください。
-        </Text>
+        <Text style={styles.title}>Log In</Text>
+        <Text style={styles.description}>Please log in to your account.</Text>
         <View style={styles.form}>
           <TextInput
             style={styles.input}
@@ -70,7 +65,7 @@ const LoginScreen = ({ navigation }) => {
           />
           <TextInput
             style={styles.input}
-            placeholder="パスワード"
+            placeholder="Password"
             value={password}
             onChangeText={(text) => setPassword(text)}
             secureTextEntry
@@ -92,17 +87,17 @@ const LoginScreen = ({ navigation }) => {
             {isLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>ログイン</Text>
+              <Text style={styles.buttonText}>Log In</Text>
             )}
           </TouchableOpacity>
         </View>
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            アカウントをお持ちでないですか？{" "}
+            Don't have an account?{" "}
             <TouchableOpacity
               onPress={() => navigation.navigate("Registration")}
             >
-              <Text style={styles.registerLink}>新規登録</Text>
+              <Text style={styles.registerLink}>Sign Up</Text>
             </TouchableOpacity>
           </Text>
         </View>
@@ -130,12 +125,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 20,
     borderRadius: 8,
-    elevation: 3, // Androidのシャドウ
-    shadowColor: "#000", // iOSのシャドウ
-    shadowOffset: { width: 0, height: 2 }, // iOSのシャドウ
-    shadowOpacity: 0.25, // iOSのシャドウ
-    shadowRadius: 3.84, // iOSのシャドウ
-    marginTop: 50, // 戻るボタンと重ならないようにマージンを追加
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    marginTop: 50,
   },
   title: {
     fontSize: 24,

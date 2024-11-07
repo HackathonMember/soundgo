@@ -27,38 +27,39 @@ const RegistrationScreen = ({ navigation }) => {
     navigation.navigate("Explanation");
 
     if (!name || !email || !password || !confirmPassword) {
-      setError("すべての項目を入力してください。");
+      setError("Please fill in all fields.");
       setIsLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("パスワードが一致しません。");
+      setError("Passwords do not match.");
       setIsLoading(false);
       return;
     }
 
     if (password.length < 8) {
-      setError("パスワードは8文字以上である必要があります。");
+      setError("Password must be at least 8 characters long.");
       setIsLoading(false);
       return;
     }
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate registration process
       setIsLoading(false);
-      RNAlert.alert("登録成功", "アカウントが正常に作成されました。", [
-        { text: "OK", onPress: () => console.log("OK Pressed") },
-      ]);
+      RNAlert.alert(
+        "Registration Successful",
+        "Your account has been created.",
+        [{ text: "OK", onPress: () => console.log("OK Pressed") }]
+      );
     } catch (err) {
-      setError("登録に失敗しました。再度お試しください。");
+      setError("Registration failed. Please try again.");
       setIsLoading(false);
     }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* 戻るボタン */}
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => navigation.navigate("LoginOrRegister")}
@@ -66,14 +67,14 @@ const RegistrationScreen = ({ navigation }) => {
         <FontAwesome name="arrow-left" size={24} color="#333" />
       </TouchableOpacity>
       <View style={styles.card}>
-        <Text style={styles.title}>アカウント登録</Text>
+        <Text style={styles.title}>Create Account</Text>
         <Text style={styles.description}>
-          新しいアカウントを作成してください。
+          Please fill in the details to create a new account.
         </Text>
         <View style={styles.form}>
           <TextInput
             style={styles.input}
-            placeholder="山田 太郎"
+            placeholder="John Doe"
             value={name}
             onChangeText={(text) => setName(text)}
             placeholderTextColor="#666"
@@ -89,7 +90,7 @@ const RegistrationScreen = ({ navigation }) => {
           />
           <TextInput
             style={styles.input}
-            placeholder="パスワード"
+            placeholder="Password"
             value={password}
             onChangeText={(text) => setPassword(text)}
             secureTextEntry
@@ -97,7 +98,7 @@ const RegistrationScreen = ({ navigation }) => {
           />
           <TextInput
             style={styles.input}
-            placeholder="パスワード（確認）"
+            placeholder="Confirm Password"
             value={confirmPassword}
             onChangeText={(text) => setConfirmPassword(text)}
             secureTextEntry
@@ -119,15 +120,15 @@ const RegistrationScreen = ({ navigation }) => {
             {isLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>登録</Text>
+              <Text style={styles.buttonText}>Sign Up</Text>
             )}
           </TouchableOpacity>
         </View>
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            すでにアカウントをお持ちですか？{" "}
+            Already have an account?{" "}
             <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-              <Text style={styles.loginLink}>ログイン</Text>
+              <Text style={styles.loginLink}>Log In</Text>
             </TouchableOpacity>
           </Text>
         </View>

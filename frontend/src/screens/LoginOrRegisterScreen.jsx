@@ -41,7 +41,7 @@ const LoginOrRegisterScreen = ({ navigation }) => {
             color="#000"
             style={{ marginRight: 10 }}
           />
-          <Text style={styles.buttonText}>New Registration</Text>
+          <Text style={styles.buttonText}>Sign Up</Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>

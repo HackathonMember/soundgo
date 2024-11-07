@@ -1,0 +1,57 @@
+{
+  "build": {
+    "production": {
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "ios": {
+        "buildType": "release"
+      }
+    },
+    "development": {
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": true
+      }
+    }
+  },
+  "update": {
+    "production": {
+      "channels": ["default"]
+    },
+    "development": {
+      "channels": ["staging"]
+    }
+  },
+  "extra": {
+    "eas": {
+      "projectId": "c65e7c04-2346-46fa-bafe-92af5622b0a7"
+    }
+  },
+  "owner": "hackathon_front",
+  "runtimeVersion": {
+    "policy": "appVersion"
+  },
+  "updates": {
+    "url": "https://u.expo.dev/c65e7c04-2346-46fa-bafe-92af5622b0a7"
+  },
+  "android": {},
+  "ios": {},
+  "expo": {
+    "android": {
+      "permissions": ["ACCESS_FINE_LOCATION"]
+    },
+    "ios": {
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "このアプリはあなたの位置情報を使用します。"
+      }
+    },
+    "splash": {
+      "image": "./assets/cat.jpg",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    }
+  }
+}

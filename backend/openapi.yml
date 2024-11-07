@@ -44,6 +44,31 @@ paths:
                 $ref: '#/components/schemas/User'
         '401':
           description: 認証失敗
+  /user/logout:
+    post:
+      summary: ユーザーのログアウト
+      security:
+        - SessionID: []
+      parameters:
+        - in: header
+          name: Cookie
+          required: true
+          schema:
+            type: string
+            example: "session_id=cookie_session_id"
+      responses:
+        '200':
+          description: ログアウト成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "ログアウトしました"
+        '401':
+          description: 認証が必要です
   /recordings:
     post:
       summary: 録音の作成

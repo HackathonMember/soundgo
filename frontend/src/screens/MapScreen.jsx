@@ -1,6 +1,7 @@
 import React from "react";
-import { StyleSheet, View, Dimensions } from "react-native";
+import { StyleSheet, View, Dimensions, TouchableOpacity } from "react-native";
 import MapView, { Marker } from "react-native-maps";
+import { FontAwesome } from "@expo/vector-icons";
 
 const points = [
   {
@@ -20,7 +21,7 @@ const points = [
   // 追加のポイント
 ];
 
-const MapScreen = () => {
+const MapScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <MapView
@@ -44,6 +45,22 @@ const MapScreen = () => {
           />
         ))}
       </MapView>
+
+      {/* 左下のプロフィールアイコン */}
+      <TouchableOpacity
+        style={styles.profileButton}
+        onPress={() => navigation.navigate("Profile")}
+      >
+        <FontAwesome name="user" size={40} color="white" />
+      </TouchableOpacity>
+
+      {/* 右下の録音アイコン */}
+      <TouchableOpacity
+        style={styles.recordButton}
+        onPress={() => navigation.navigate("Record")}
+      >
+        <FontAwesome name="microphone" size={40} color="white" />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -57,5 +74,25 @@ const styles = StyleSheet.create({
   map: {
     width: Dimensions.get("window").width,
     height: Dimensions.get("window").height,
+  },
+  profileButton: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    backgroundColor: "#1e90ff",
+    padding: 12,
+    borderRadius: 30,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  recordButton: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    backgroundColor: "#ff6347",
+    padding: 12,
+    borderRadius: 30,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

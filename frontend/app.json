@@ -17,41 +17,39 @@
       }
     }
   },
-  "update": {
-    "production": {
-      "channels": ["default"]
-    },
-    "development": {
-      "channels": ["staging"]
-    }
-  },
-  "extra": {
-    "eas": {
-      "projectId": "c65e7c04-2346-46fa-bafe-92af5622b0a7"
-    }
-  },
-  "owner": "hackathon_front",
-  "runtimeVersion": {
-    "policy": "appVersion"
-  },
-  "updates": {
-    "url": "https://u.expo.dev/c65e7c04-2346-46fa-bafe-92af5622b0a7"
-  },
   "android": {},
   "ios": {},
   "expo": {
+    "name": "Necord",
+    "icon": "./assets/icon.png",
     "android": {
-      "permissions": ["ACCESS_FINE_LOCATION"]
+      "permissions": [
+        "ACCESS_FINE_LOCATION"
+      ]
     },
     "ios": {
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "このアプリはあなたの位置情報を使用します。"
-      }
+      },
+      "bundleIdentifier": "com.soundgo.necord"
     },
     "splash": {
       "image": "./assets/splash_screen.jpg",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "df9ca00c-0d6b-4d12-9197-ba7fef2bc98e"
+      }
+    },
+    "owner": "hackathon_front",
+    "slug": "frontend",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/df9ca00c-0d6b-4d12-9197-ba7fef2bc98e"
     }
   }
 }

@@ -18,7 +18,11 @@ class Session(db.Model):
         unique=True,
         nullable=False,
     )
-    user_id = db.Column(db.String(36), db.ForeignKey("users.user_id"), nullable=False)
+    user_id = db.Column(
+        db.String(36),
+        db.ForeignKey("users.user_id"),
+        nullable=False
+    )
     created_at = db.Column(
         db.DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -26,7 +30,10 @@ class Session(db.Model):
 
     @classmethod
     def create_session(cls, user_id):
-        new_session = cls(user_id=user_id, expires_at=func.now() + SESSION_DURATION)
+        new_session = cls(
+            user_id=user_id,
+            expires_at=func.now() + SESSION_DURATION
+        )
         db.session.add(new_session)
         db.session.commit()
         return new_session, new_session.expires_at

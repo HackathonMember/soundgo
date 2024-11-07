@@ -49,13 +49,6 @@ paths:
       summary: ユーザーのログアウト
       security:
         - SessionID: []
-      parameters:
-        - in: header
-          name: Cookie
-          required: true
-          schema:
-            type: string
-            example: "session_id=cookie_session_id"
       responses:
         '200':
           description: ログアウト成功
@@ -148,7 +141,7 @@ components:
   securitySchemes:
     SessionID:
       type: apiKey
-      in: header
+      in: cookie
       name: Session-ID
       description: ログイン後に提供されるセッションID
   parameters:

@@ -1,24 +1,20 @@
 import React from "react";
 import { StyleSheet, View, Text, SafeAreaView } from "react-native";
-import ProfileScreen from "./ProfileScreen";
 
-const HomeScreen = () => {
+const Activity = () => {
   return (
     <View style={styles.container}>
-      <ProfileScreen />
+      <Text style={styles.welcomeText}>number of sounds collected</Text>
+      <Text style={styles.welcomeText}>the Day I started</Text>
+      <Text style={styles.welcomeText}>the Day!</Text>
     </View>
   );
 };
-
-export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#eee",
-  },
-  safeArea: {
-    flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 16,
@@ -26,6 +22,8 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
+    color: "#6cdeeb",
   },
 });
+
+export default Activity;

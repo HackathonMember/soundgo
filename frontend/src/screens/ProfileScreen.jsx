@@ -1,16 +1,18 @@
 import React from "react";
 import { StyleSheet, View, Text, SafeAreaView } from "react-native";
-import ProfileScreen from "./ProfileScreen";
+import Activity from "../components/Activity";
+import Profile from "../components/Profile";
 
-const HomeScreen = () => {
+const ProfileScreen = () => {
   return (
     <View style={styles.container}>
-      <ProfileScreen />
+      <SafeAreaView style={styles.safeArea}>
+        {/* <Profile /> */}
+        <Activity />
+      </SafeAreaView>
     </View>
   );
 };
-
-export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -29,3 +31,5 @@ const styles = StyleSheet.create({
     color: "#333",
   },
 });
+
+export default ProfileScreen;

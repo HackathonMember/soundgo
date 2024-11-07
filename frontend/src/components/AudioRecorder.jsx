@@ -1,11 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { View, Button, Text, Alert, StyleSheet } from "react-native";
+// App.js
+
+import React, { useState, useEffect, useRef } from "react";
+import {
+  View,
+  Button,
+  Text, // ここにTextを追加
+  Alert,
+  StyleSheet,
+  ImageBackground,
+  TouchableOpacity,
+  Animated,
+} from "react-native";
 import { Audio } from "expo-av";
 import * as FileSystem from "expo-file-system";
 import FFT from "fft.js";
 import base64js from "base64-js"; // base64-jsをインポート
+import { FontAwesome } from "@expo/vector-icons";
 
-// メインコンポーネントの定義
 const RecorderWithAnimation = () => {
   // 録音状態の管理
   const [recording, setRecording] = useState(null);
@@ -19,11 +30,30 @@ const RecorderWithAnimation = () => {
   // 周波数データの管理
   const [frequencies, setFrequencies] = useState(null);
 
-  // マイクの位置を管理
-  const [micPosition, setMicPosition] = useState({
-    x: 0,
-    y: 0,
-  });
+  // アニメーション用の参照
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  // 録音ボタンのアニメーション設定
+  useEffect(() => {
+    if (isRecording) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(scaleAnim, {
+            toValue: 1.2,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    } else {
+      scaleAnim.setValue(1);
+    }
+  }, [isRecording]);
 
   // マイクの権限をリクエスト
   useEffect(() => {
@@ -224,7 +254,7 @@ const RecorderWithAnimation = () => {
     return pcm;
   };
 
-  const getAudioFrequency = async () => {
+  const getAudioFrequency = async (filePath) => {
     try {
       // 音声ファイルをBase64として読み取る
       const fileData = await FileSystem.readAsStringAsync(filePath, {
@@ -271,29 +301,71 @@ const RecorderWithAnimation = () => {
 
   return (
     <View style={styles.container}>
-      {/* 録音・再生コントロール */}
-      <View style={styles.controls}>
-        <Button
-          title={isRecording ? "録音を停止" : "録音を開始"}
-          onPress={isRecording ? stopRecording : startRecording}
-        />
-        {isRecording && <Text style={styles.recordingText}>録音中...</Text>}
-        {recordedURI ? (
-          <View style={styles.recordedSection}>
-            {/* <Text style={styles.recordedText}>録音ファイル: {recordedURI}</Text> */}
-            <Button title="録音を保存" onPress={saveRecording} />
-            <View style={styles.playButton}>
-              <Button
-                title={isPlaying ? "再生を停止" : "録音を再生"}
-                onPress={isPlaying ? stopSound : playSound}
+      {/* 録音中に背景GIFを表示 */}
+      {isRecording && (
+        <ImageBackground
+          source={require("../../assets/EGH_1.gif")} // 正しい相対パスを指定
+          style={styles.backgroundGif}
+          resizeMode="cover"
+        >
+          {/* 録音ボタンを中央下に配置 */}
+          <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+            <TouchableOpacity
+              style={[
+                styles.recordButton,
+                { backgroundColor: isRecording ? "red" : "gray" },
+              ]}
+              onPress={isRecording ? stopRecording : startRecording}
+            >
+              <FontAwesome
+                name={isRecording ? "stop" : "microphone"}
+                size={30}
+                color="#fff"
               />
-            </View>
-          </View>
-        ) : null}
+            </TouchableOpacity>
+          </Animated.View>
+        </ImageBackground>
+      )}
 
-        {/* 周波数データの表示 */}
-        {/* {frequencies && <FrequencyDisplay frequencies={frequencies} />} */}
-      </View>
+      {/* 録音前のボタン */}
+      {!isRecording && (
+        <TouchableOpacity
+          style={[
+            styles.recordButton,
+            { backgroundColor: isRecording ? "red" : "gray" },
+          ]}
+          onPress={isRecording ? stopRecording : startRecording}
+        >
+          <FontAwesome
+            name={isRecording ? "stop" : "microphone"}
+            size={30}
+            color="#fff"
+          />
+        </TouchableOpacity>
+      )}
+
+      {/* 録音後の再生・保存ボタン */}
+      {recordedURI && !isRecording && (
+        <View style={styles.actionButtons}>
+          <TouchableOpacity style={styles.actionButton} onPress={saveRecording}>
+            <FontAwesome name="save" size={20} color="#fff" />
+            <Text style={styles.actionButtonText}>保存</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={isPlaying ? stopSound : playSound}
+          >
+            <FontAwesome
+              name={isPlaying ? "stop" : "play"}
+              size={20}
+              color="#fff"
+            />
+            <Text style={styles.actionButtonText}>
+              {isPlaying ? "停止" : "再生"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
@@ -305,58 +377,53 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    justifyContent: "center",
-  },
-  recordedSection: {
-    marginTop: 20,
+    justifyContent: "flex-end",
     alignItems: "center",
   },
-  recordedText: {
-    marginBottom: 10,
-    fontSize: 16,
-  },
-  playButton: {
-    marginTop: 10,
-  },
-  recordingText: {
-    marginTop: 10,
-    color: "red",
-    fontWeight: "bold",
-  },
-  microphoneContainer: {
+  backgroundGif: {
     position: "absolute",
-    bottom: 40,
-    alignSelf: "center",
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 3,
-    borderColor: "#666",
-    justifyContent: "center",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    justifyContent: "flex-end",
     alignItems: "center",
   },
-  microphone: {
-    width: 40,
-    height: 40,
+  recordButton: {
+    width: 95,
+    height: 95,
+    borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 55,
+    elevation: 5, // Androidのシャドウ
+    shadowColor: "#000", // iOSのシャドウ
+    shadowOffset: { width: 0, height: 2 }, // iOSのシャドウ
+    shadowOpacity: 0.25, // iOSのシャドウ
+    shadowRadius: 3.84, // iOSのシャドウ
+  },
+  actionButtons: {
+    flexDirection: "row",
+    marginBottom: 30,
+  },
+  actionButton: {
+    backgroundColor: "#1e90ff",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 20,
-    backgroundColor: "#666",
-  },
-  note: {
-    position: "absolute",
-  },
-  controls: {
+    marginHorizontal: 10,
+    flexDirection: "row",
     alignItems: "center",
+    elevation: 3, // Androidのシャドウ
+    shadowColor: "#000", // iOSのシャドウ
+    shadowOffset: { width: 0, height: 2 }, // iOSのシャドウ
+    shadowOpacity: 0.25, // iOSのシャドウ
+    shadowRadius: 3.84, // iOSのシャドウ
   },
-  frequencyContainer: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  frequencyTitle: {
+  actionButtonText: {
+    color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginLeft: 5,
   },
 });

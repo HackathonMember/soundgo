@@ -1,5 +1,11 @@
 import React from "react";
-import { StyleSheet, View, Dimensions, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Dimensions,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { FontAwesome } from "@expo/vector-icons";
 
@@ -22,6 +28,19 @@ const points = [
 ];
 
 const MapScreen = ({ navigation }) => {
+  const handleLogout = () => {
+    Alert.alert("Logout Confirmation", "Are you sure you want to log out?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Logout",
+        onPress: () => navigation.navigate("Login"),
+      },
+    ]);
+  };
+
   return (
     <View style={styles.container}>
       <MapView
@@ -45,6 +64,11 @@ const MapScreen = ({ navigation }) => {
           />
         ))}
       </MapView>
+
+      {/* 左上のログアウトボタン */}
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <FontAwesome name="sign-out" size={24} color="white" />
+      </TouchableOpacity>
 
       {/* 左下のプロフィールアイコン */}
       <TouchableOpacity
@@ -74,6 +98,16 @@ const styles = StyleSheet.create({
   map: {
     width: Dimensions.get("window").width,
     height: Dimensions.get("window").height,
+  },
+  logoutButton: {
+    position: "absolute",
+    top: 40,
+    left: 20,
+    backgroundColor: "#333",
+    padding: 10,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
   },
   profileButton: {
     position: "absolute",

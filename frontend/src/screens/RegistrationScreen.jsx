@@ -9,8 +9,9 @@ import {
   Text,
   ActivityIndicator,
 } from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
 
-const RegistrationScreen = ({ navigation, route }) => {
+const RegistrationScreen = ({ navigation }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +26,6 @@ const RegistrationScreen = ({ navigation, route }) => {
     // 説明画面遷移確認のために一時的に追加
     navigation.navigate("Explanation");
 
-    // 基本的なバリデーション
     if (!name || !email || !password || !confirmPassword) {
       setError("すべての項目を入力してください。");
       setIsLoading(false);
@@ -38,18 +38,15 @@ const RegistrationScreen = ({ navigation, route }) => {
       return;
     }
 
-    // パスワードの強度チェック（例：8文字以上）
     if (password.length < 8) {
       setError("パスワードは8文字以上である必要があります。");
       setIsLoading(false);
       return;
     }
 
-    // 実際の登録処理をここに実装します
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // 登録処理のシミュレーション
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setIsLoading(false);
-      // 登録成功後の処理（例：ログインページへのナビゲーション）
       RNAlert.alert("登録成功", "アカウントが正常に作成されました。", [
         { text: "OK", onPress: () => console.log("OK Pressed") },
       ]);
@@ -61,6 +58,13 @@ const RegistrationScreen = ({ navigation, route }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {/* 戻るボタン */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.navigate("LoginOrRegister")}
+      >
+        <FontAwesome name="arrow-left" size={24} color="#333" />
+      </TouchableOpacity>
       <View style={styles.card}>
         <Text style={styles.title}>アカウント登録</Text>
         <Text style={styles.description}>
@@ -141,15 +145,22 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: "#f2f2f2",
   },
+  backButton: {
+    position: "absolute",
+    top: 40,
+    left: 16,
+    zIndex: 1,
+  },
   card: {
     backgroundColor: "#fff",
     padding: 20,
     borderRadius: 8,
-    elevation: 3, // Androidのシャドウ
-    shadowColor: "#000", // iOSのシャドウ
-    shadowOffset: { width: 0, height: 2 }, // iOSのシャドウ
-    shadowOpacity: 0.25, // iOSのシャドウ
-    shadowRadius: 3.84, // iOSのシャドウ
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    marginTop: 50,
   },
   title: {
     fontSize: 24,

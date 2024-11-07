@@ -1,5 +1,3 @@
-// src/screens/LoginScreen.jsx
-
 import React, { useState } from "react";
 import {
   View,
@@ -11,6 +9,7 @@ import {
   ActivityIndicator,
   Alert as RNAlert,
 } from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -47,6 +46,13 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {/* 戻るボタン */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.navigate("LoginOrRegister")}
+      >
+        <FontAwesome name="arrow-left" size={24} color="#333" />
+      </TouchableOpacity>
       <View style={styles.card}>
         <Text style={styles.title}>ログイン</Text>
         <Text style={styles.description}>
@@ -114,6 +120,12 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: "#f2f2f2",
   },
+  backButton: {
+    position: "absolute",
+    top: 40,
+    left: 16,
+    zIndex: 1,
+  },
   card: {
     backgroundColor: "#fff",
     padding: 20,
@@ -123,6 +135,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 }, // iOSのシャドウ
     shadowOpacity: 0.25, // iOSのシャドウ
     shadowRadius: 3.84, // iOSのシャドウ
+    marginTop: 50, // 戻るボタンと重ならないようにマージンを追加
   },
   title: {
     fontSize: 24,

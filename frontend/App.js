@@ -1,7 +1,10 @@
 import React from "react";
 import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
+import {
+  createStackNavigator,
+  TransitionPresets,
+} from "@react-navigation/stack";
 
 import LoginOrRegisterScreen from "./src/screens/LoginOrRegisterScreen";
 import LoginScreen from "./src/screens/LoginScreen";
@@ -42,7 +45,14 @@ const App = () => {
         <Stack.Screen name="Caution" component={CautionScreen} />
 
         {/* マップ画面 */}
-        <Stack.Screen name="Map" component={MapScreen} />
+        <Stack.Screen
+          name="Map"
+          component={MapScreen}
+          options={{
+            headerShown: false,
+            ...TransitionPresets.FadeFromBottomAndroid, // フェードアニメーションを設定
+          }}
+        />
 
         {/* プロフィール画面 */}
         <Stack.Screen name="Profile" component={ProfileScreen} />

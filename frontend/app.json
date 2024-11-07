@@ -49,7 +49,7 @@
       }
     },
     "splash": {
-      "image": "./assets/cat.jpg",
+      "image": "./assets/splash_screen.jpg",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     }

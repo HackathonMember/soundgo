@@ -10,6 +10,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 
+import { signUp } from "../api/user/signup";
+
 const RegistrationForm = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -44,7 +46,7 @@ const RegistrationForm = () => {
 
     // 実際の登録処理をここに実装します
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // 登録処理のシミュレーション
+      await signUp(name, email, password);
       setIsLoading(false);
       // 登録成功後の処理（例：ログインページへのナビゲーション）
       RNAlert.alert("登録成功", "アカウントが正常に作成されました。", [

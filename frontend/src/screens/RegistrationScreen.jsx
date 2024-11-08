@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 
+import { signUp } from "../api/user/signup";
+
 const RegistrationScreen = ({ navigation }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -45,7 +47,7 @@ const RegistrationScreen = ({ navigation }) => {
     }
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate registration process
+      await signUp(name, password);
       setIsLoading(false);
       RNAlert.alert(
         "Registration Successful",

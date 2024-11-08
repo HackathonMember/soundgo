@@ -2,58 +2,42 @@ import React, { useState } from "react";
 import {
   View,
   StyleSheet,
-  Alert as RNAlert,
   TouchableOpacity,
   ScrollView,
   TextInput,
   Text,
   ActivityIndicator,
+  Alert as RNAlert,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 
-const RegistrationScreen = ({ navigation }) => {
-  const [name, setName] = useState("");
+const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async () => {
+  const handleLogin = async () => {
     setError("");
     setIsLoading(true);
 
-    // 説明画面遷移確認のために一時的に追加
-    navigation.navigate("Explanation");
+    // 注意書き画面遷移確認のために一時的に追加
+    navigation.navigate("Caution");
 
-    if (!name || !email || !password || !confirmPassword) {
-      setError("Please fill in all fields.");
-      setIsLoading(false);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      setIsLoading(false);
-      return;
-    }
-
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
+    if (!email || !password) {
+      setError("Please enter your email and password.");
       setIsLoading(false);
       return;
     }
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate registration process
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setIsLoading(false);
-      RNAlert.alert(
-        "Registration Successful",
-        "Your account has been created.",
-        [{ text: "OK", onPress: () => console.log("OK Pressed") }]
-      );
+      RNAlert.alert("Login Successful", "You have successfully logged in.", [
+        { text: "OK", onPress: () => console.log("OK Pressed") },
+      ]);
     } catch (err) {
-      setError("Registration failed. Please try again.");
+      setError("Login failed. Please try again.");
       setIsLoading(false);
     }
   };
@@ -67,18 +51,9 @@ const RegistrationScreen = ({ navigation }) => {
         <FontAwesome name="arrow-left" size={24} color="#333" />
       </TouchableOpacity>
       <View style={styles.card}>
-        <Text style={styles.title}>Create Account</Text>
-        <Text style={styles.description}>
-          Please fill in the details to create a new account.
-        </Text>
+        <Text style={styles.title}>Log In</Text>
+        <Text style={styles.description}>Please log in to your account.</Text>
         <View style={styles.form}>
-          <TextInput
-            style={styles.input}
-            placeholder="John Doe"
-            value={name}
-            onChangeText={(text) => setName(text)}
-            placeholderTextColor="#666"
-          />
           <TextInput
             style={styles.input}
             placeholder="you@example.com"
@@ -96,14 +71,6 @@ const RegistrationScreen = ({ navigation }) => {
             secureTextEntry
             placeholderTextColor="#666"
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChangeText={(text) => setConfirmPassword(text)}
-            secureTextEntry
-            placeholderTextColor="#666"
-          />
           {error ? (
             <View style={styles.errorContainer}>
               <Text style={styles.errorText}>⚠️ {error}</Text>
@@ -114,21 +81,23 @@ const RegistrationScreen = ({ navigation }) => {
               styles.button,
               isLoading ? styles.buttonDisabled : styles.buttonEnabled,
             ]}
-            onPress={handleSubmit}
+            onPress={handleLogin}
             disabled={isLoading}
           >
             {isLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Sign Up</Text>
+              <Text style={styles.buttonText}>Log In</Text>
             )}
           </TouchableOpacity>
         </View>
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Already have an account?{" "}
-            <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-              <Text style={styles.loginLink}>Log In</Text>
+            Don't have an account?{" "}
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Registration")}
+            >
+              <Text style={styles.registerLink}>Sign Up</Text>
             </TouchableOpacity>
           </Text>
         </View>
@@ -137,7 +106,7 @@ const RegistrationScreen = ({ navigation }) => {
   );
 };
 
-export default RegistrationScreen;
+export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -224,7 +193,7 @@ const styles = StyleSheet.create({
     color: "gray",
     fontSize: 14,
   },
-  loginLink: {
+  registerLink: {
     color: "#1e88e5",
     textDecorationLine: "underline",
   },

@@ -9,7 +9,9 @@
           "containerName":"",
           "condition":"SUCCESS"
         }
-      ]
+      ],
+      "memory": 512,
+      "memoryReservation": 256
     },
     {
       "name":"migration",

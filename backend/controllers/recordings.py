@@ -4,7 +4,6 @@ from io import BytesIO
 from logging import getLogger
 
 from flask import Blueprint, g, jsonify, request
-
 from models import Recording
 from models.s3 import S3
 
@@ -75,10 +74,7 @@ def create_recording():
         # レコーディングが正常に作成されたことを返す
         return (
             jsonify(
-                {
-                    "message": "Recording created successfully",
-                    "data": recording_data
-                }
+                {"message": "Recording created successfully", "data": recording_data}
             ),
             201,
         )
@@ -98,18 +94,24 @@ def get_recording(id):
             recording_id = recording.id
             recording_at = recording.recorded_at
             created_at = recording.created_at
-            return jsonify(
-                {
-                    "recording id": recording_id,
-                    "recording at": recording_at,
-                    "created at": created_at,
-                }
-            ), 200
+            return (
+                jsonify(
+                    {
+                        "recording id": recording_id,
+                        "recording at": recording_at,
+                        "created at": created_at,
+                    }
+                ),
+                200,
+            )
         return jsonify({"message": "録音が見つかりません"}), 404
     except Exception as e:
         # エラー詳細を返す
         logger.error(f"Error retrieving recording: {str(e)}")
-        return jsonify({"message": "サーバーエラーが発生しました", "error": str(e)}), 500
+        return (
+            jsonify({"message": "サーバーエラーが発生しました", "error": str(e)}),
+            500,
+        )
 
 
 @recordings.route("/<id>", methods=["PUT"])
@@ -171,10 +173,7 @@ def update_recording(id):
         # レコーディングが正常に作成されたことを返す
         return (
             jsonify(
-                {
-                    "message": "Recording created successfully",
-                    "data": recording_data
-                }
+                {"message": "Recording created successfully", "data": recording_data}
             ),
             201,
         )
@@ -199,16 +198,14 @@ def delete_recording(id):
 
         # 音声ファイルのURLからファイルキーを抽出
         file_url = recording.audio_url
-        file_key = file_url.split('/recordings/')[1]
+        file_key = file_url.split("/recordings/")[1]
 
         # S3から音声ファイルを削除
         s3_client = S3("soundgo")
         success = s3_client.delete(file_key)
 
         if not success:
-            return jsonify(
-                {"error": "Failed to delete the audio file from S3"}
-            ), 500
+            return jsonify({"error": "Failed to delete the audio file from S3"}), 500
 
         # データベースから録音データを削除
         Recording.delete_recording(id)

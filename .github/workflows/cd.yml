@@ -60,36 +60,34 @@ jobs:
         run: |
           aws ecs describe-task-definition --task-definition soundgo --query taskDefinition > task-definition.json
 
-      # 8. Render new task definition with updated image
       - name: Render Amazon ECS task definition
         id: render-container
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: task-definition.json
-          container-name: soundgo-cluster
+          container-name: soundgo
           image: latest
 
-      # 9. Register new task definition
+      # Register new task definition
       - name: Register new task definition
         id: register-task-def
         run: |
           NEW_TASK_DEF=$(aws ecs register-task-definition --cli-input-json file://${{ steps.render-container.outputs.task-definition }} | jq -r '.taskDefinition.taskDefinitionArn')
           echo "TASK_DEFINITION_ARN=$NEW_TASK_DEF" >> $GITHUB_ENV
 
-      # 10. Run migration task
+      # Run migration task
       - name: Run Migrations
-        uses: noelzubin/aws-ecs-run-task@v1.0
+        id: run-task
+        uses: yyoshiki41/ecs-run-task-action@v0.0.9
         with:
           cluster: soundgo-cluster
-          task-definition: soundgo
-          subnets: subnet-0a56214a722366ddd,subnet-0f3b388677b3be3fc,subnet-0138e1f7d9120a3c5
-          security-groups: sg-012ca51c550450a5d
-          assign-public-ip: ENABLED
-          override-container: soundgo-cluster
-          override-container-command: |
-            sh
-            -c
-            flask db upgrade
+          task-definition: ${{ env.TASK_DEFINITION_ARN }}
+          task-definition-family: soundgo
+          launch-type: "EC2"
+          subnets: '["subnet-0a56214a722366ddd", "subnet-0f3b388677b3be3fc", "subnet-0138e1f7d9120a3c5"]'
+          security-groups: '["sg-012ca51c550450a5d"]'
+          container-name: soundgo
+          command: '["sh", "-c", "flask db upgrade"]'
 
       # 11. Deploy to Amazon ECS service
       - name: Deploy to Amazon ECS service
@@ -97,4 +95,4 @@ jobs:
         with:
           task-definition: ${{ steps.render-container.outputs.task-definition }}
           service: soundgo
-          cluster: soundgo
+          cluster: soundgo-cluster

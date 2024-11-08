@@ -49,6 +49,13 @@ paths:
       summary: ユーザーのログアウト
       security:
         - SessionID: []
+      parameters:
+        - in: header
+          name: Cookie
+          required: true
+          schema:
+            type: string
+            example: "session_id=cookie_session_id"
       responses:
         '200':
           description: ログアウト成功

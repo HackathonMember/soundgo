@@ -87,7 +87,7 @@ def create_recording():
 
 @recordings.route("/<id>", methods=["GET"])
 @login_required
-def get_recording(id):
+def get_recording_by_id(id):
     try:
         recording = Recording.get_recording_by_id(id)
         if recording:
@@ -112,6 +112,35 @@ def get_recording(id):
             jsonify({"message": "サーバーエラーが発生しました", "error": str(e)}),
             500,
         )
+
+@recordings.route("/", methods=["GET"])
+@login_required
+def get_recording():
+    try:
+        if not g.user:
+            return jsonify({"error": "User not authenticated"}), 401
+
+        # メソッドを呼び出して、録音データを取得
+        recording_list = Recording.get_recordings_by_user_id(g.user.user_id)
+        
+        # 録音が見つかった場合のみリスト化
+        if recording_list:
+            res = [
+                {
+                    "recording_id": record.recording_id,
+                    "recording_at": record.recording_at,
+                    "created_at": record.created_at,
+                } for record in recording_list
+            ]
+            return jsonify(res), 200
+        
+        # 録音が見つからない場合
+        return jsonify({"message": "録音が見つかりません"}), 404
+
+    except Exception as e:
+        # エラーメッセージと例外を記録
+        logger.error(f"Error retrieving recording: {e}")
+        return jsonify({"message": "サーバーエラーが発生しました", "error": str(e)}), 500
 
 
 @recordings.route("/<id>", methods=["PUT"])

@@ -2,9 +2,14 @@ all: build up
 build:
 	docker compose build --no-cache
 up:
-	docker compose up -d
+	docker compose up -d 
+	while [ 1 ]; do;sleep 3; sudo make migrate && make bash ;done;
+
 down:
 	docker compose down -v
+
+re: down up
+
 mysql:
 	docker compose exec mysql mysql -u user -p
 bash:
@@ -17,4 +22,7 @@ migrate:
 	docker compose exec app bash -c "flask db migrate" | true
 	docker compose exec app bash -c "flask db upgrade" | true
 
+login:
+	curl -X 'POST'  'http://localhost:8080/user/signup' -H 'accept: */*' -H 'Content-Type: application/json' -d '{ "username": "string", "password": "string" }'
+	curl -X 'POST' 'http://localhost:8080/user/login' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{ "username": "string", "password": "string" }' -v 
 .PHONY: all up down build mysql migrate bash format

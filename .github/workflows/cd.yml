@@ -65,8 +65,8 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: task-definition.json
-          container-name: soundgo
-          image: ${{ steps.build-image-app.outputs.image }}
+          container-name: soundgo-app
+          image: soundgo:latest
 
       - name: Deploy to ECS
         env:
@@ -79,7 +79,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: aws/task-definition.json
-          container-name: soundgo
+          container-name: soundgo-migrate
           image: soundgo:latest
 
       # Run migration task
@@ -97,9 +97,9 @@ jobs:
         with:
           cluster: soundgo-cluster
           task-definition: ${{ steps.migration-task-def.outputs.task-definition }}
-          task-definition-family: soundgo
+          task-definition-family: migrate
           launch-type: "EC2"
           subnets: '["subnet-0a56214a722366ddd", "subnet-0f3b388677b3be3fc", "subnet-0138e1f7d9120a3c5"]'
           security-groups: '["sg-012ca51c550450a5d"]'
-          container-name: soundgo
+          container-name: soundgo-migrate
           command: '["sh", "-c", "flask db upgrade"]'

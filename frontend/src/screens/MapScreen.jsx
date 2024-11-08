@@ -5,24 +5,28 @@ import {
   Dimensions,
   TouchableOpacity,
   Alert,
+  Image,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { FontAwesome } from "@expo/vector-icons";
+
+const pin1Image = require("../../assets/pin1.png");
+const pin2Image = require("../../assets/pin2.png");
 
 const points = [
   {
     id: 1,
     title: "ポイント1",
     description: "説明1",
-    latitude: 37.78825,
-    longitude: -122.4324,
+    latitude: 35.6609219,
+    longitude: 139.6666027,
   },
   {
     id: 2,
     title: "ポイント2",
     description: "説明2",
-    latitude: 37.75825,
-    longitude: -122.4624,
+    latitude: 35.6905,
+    longitude: 139.6995,
   },
   // 追加のポイント
 ];
@@ -61,7 +65,12 @@ const MapScreen = ({ navigation }) => {
             }}
             title={point.title}
             description={point.description}
-          />
+            >
+              <Image
+                source={point.id % 2 === 1 ? pin1Image : pin2Image}
+                style={{ width: 30, height: 40 }} // サイズを指定
+              />
+            </Marker>
         ))}
       </MapView>
 

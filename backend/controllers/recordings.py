@@ -52,7 +52,9 @@ def create_recording():
 
         # レコーディングの情報（データベースに保存する場合など）
         recording_data = {
-            "audio_url": f"https://{s3_client.bucket.name}.s3.amazonaws.com/{file_key}",
+            "audio_url": (
+                f"https://{s3_client.bucket.name}.s3.amazonaws.com/{file_key}"
+            ),
             "date_recorded": date_recorded,
             "latitude": latitude,
             "longitude": longitude,
@@ -73,7 +75,10 @@ def create_recording():
         # レコーディングが正常に作成されたことを返す
         return (
             jsonify(
-                {"message": "Recording created successfully", "data": recording_data}
+                {
+                    "message": "Recording created successfully",
+                    "data": recording_data
+                }
             ),
             201,
         )
@@ -82,6 +87,30 @@ def create_recording():
         # エラーが発生した場合、エラーメッセージを返す
         logger.error(f"Error occurred: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+
+@recordings.route("/<id>", methods=["GET"])
+@login_required
+def get_recording(id):
+    try:
+        recording = Recording.get_recording_by_id(id)
+        if recording:
+            recording_id = recording.id
+            recording_at = recording.recorded_at
+            created_at = recording.created_at
+            return jsonify(
+                {
+                    "recording id": recording_id,
+                    "recording at": recording_at,
+                    "created at": created_at,
+                }
+            ), 200
+        return jsonify({"message": "録音が見つかりません"}), 404
+    except Exception as e:
+        # エラー詳細を返す
+        logger.error(f"Error retrieving recording: {str(e)}")
+        return jsonify({"message": "サーバーエラーが発生しました", "error": str(e)}), 500
+
 
 
 @recordings.route("/<id>", methods=["PUT"])

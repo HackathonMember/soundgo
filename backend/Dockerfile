@@ -4,9 +4,6 @@ FROM python:3.10
 # 作業ディレクトリを設定
 WORKDIR /app
 
-# mysql
-RUN apt-get update && apt-get install -y default-mysql-client libgl1-mesa-glx && rm -rf /var/cache/apk/*
-
 # Poetryをインストール
 RUN curl -sSL https://install.python-poetry.org | python3 - && \
     echo "export PATH=/root/.local/bin:$PATH" >> ~/.bashrc && \
@@ -24,3 +21,5 @@ RUN poetry install
 
 # Flaskアプリケーションのコードをコピー
 COPY . .
+
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]

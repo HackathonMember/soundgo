@@ -62,7 +62,7 @@ jobs:
 
       - name: Render Amazon ECS app task definition with app container
         id: render-app-container
-        uses: aws-actions/amazon-ecs-render-task-definition@v2
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: task-definition.json
           container-name: soundgo

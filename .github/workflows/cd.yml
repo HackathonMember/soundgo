@@ -82,7 +82,6 @@ jobs:
           container-name: migrate
           image: soundgo:latest
 
-      # Run migration task
       - name: Deploy to Amazon ECS service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
@@ -90,6 +89,39 @@ jobs:
           service: soundgo
           cluster: soundgo-cluster
           wait-for-service-stability: true
+
+      # 9. Get EC2 Instance ID
+      - name: Get EC2 Instance ID
+        id: get-ec2-instance
+        run: |
+          INSTANCE_ID=$(aws ecs describe-container-instances \
+            --cluster soundgo-cluster \
+            --container-instances $(aws ecs list-container-instances \
+              --cluster soundgo-cluster \
+              --query 'containerInstanceArns[0]' \
+              --output text) \
+            --query 'containerInstances[0].ec2InstanceId' \
+            --output text)
+          echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
+
+      # 10. Disassociate Elastic IP if necessary
+      - name: Disassociate Elastic IP (if associated)
+        continue-on-error: true
+        run: |
+          ASSOCIATION_ID=$(aws ec2 describe-addresses \
+            --allocation-ids ${{ secrets.AWS_EIP_ALLOCATION_ID }} \
+            --query 'Addresses[0].AssociationId' \
+            --output text)
+          if [ "$ASSOCIATION_ID" != "None" ]; then
+            aws ec2 disassociate-address --association-id $ASSOCIATION_ID
+          fi
+
+      # 11. Associate Elastic IP to EC2 Instance
+      - name: Associate Elastic IP to EC2 Instance
+        run: |
+          aws ec2 associate-address \
+            --instance-id $INSTANCE_ID \
+            --allocation-id ${{ secrets.AWS_EIP_ALLOCATION_ID }}
 
       # 11. Deploy to Amazon ECS service
       - name: Run Migrations
@@ -101,6 +133,6 @@ jobs:
           task-definition-family: migrate
           launch-type: "EC2"
           subnets: '["subnet-0a56214a722366ddd", "subnet-0f3b388677b3be3fc", "subnet-0138e1f7d9120a3c5"]'
-      #     security-groups: '["sg-012ca51c550450a5d"]'
-      #     container-name: soundgo-migrate
-      #     command: '["sh", "-c", "flask db upgrade"]'
+          security-groups: '["sg-012ca51c550450a5d"]'
+          container-name: soundgo-migrate
+          command: '["sh", "-c", "flask db upgrade"]'

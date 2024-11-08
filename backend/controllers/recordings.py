@@ -127,8 +127,8 @@ def get_recording():
         if recording_list:
             res = [
                 {
-                    "recording_id": record.recording_id,
-                    "recording_at": record.recording_at,
+                    "recording_id": record.id,
+                    "recording_at": record.recorded_at,
                     "created_at": record.created_at,
                 } for record in recording_list
             ]

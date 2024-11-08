@@ -58,7 +58,7 @@ class Recording(db.Model):
     
     @classmethod
     def get_recordings_by_user_id(cls, user_id):
-        return cls.query.filter_by(user_id=user_id).all
+        return cls.query.filter_by(user_id=user_id).all()
 
     @classmethod
     def update_recording(

@@ -14,65 +14,63 @@ import CautionScreen from "./src/screens/CautionScreen";
 import MapScreen from "./src/screens/MapScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 import RecordScreen from "./src/screens/RecordScreen";
-import { LocationProvider } from "./src/context/LocationContext";
-import { AudioProvider } from "./src/context/AudioContext";
+import { Provider } from "react-redux";
+import { store } from "./src/store";
 
 const Stack = createStackNavigator();
 
 const App = () => {
   return (
-    <LocationProvider>
-      <AudioProvider>
-        <NavigationContainer>
-          <Stack.Navigator
-            initialRouteName="LoginOrRegister"
-            screenOptions={{
+    <Provider store={store}>
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName="LoginOrRegister"
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          {/* スタート画面: ログインか新規登録を選択 */}
+          <Stack.Screen
+            name="LoginOrRegister"
+            component={LoginOrRegisterScreen}
+          />
+
+          {/* ログイン画面 */}
+          <Stack.Screen name="Login" component={LoginScreen} />
+
+          {/* 新規登録画面 */}
+          <Stack.Screen name="Registration" component={RegistrationScreen} />
+
+          {/* 説明画面 */}
+          <Stack.Screen name="Explanation" component={ExplanationScreen} />
+
+          {/* 注意書き画面 */}
+          <Stack.Screen name="Caution" component={CautionScreen} />
+
+          {/* マップ画面 */}
+          <Stack.Screen
+            name="Map"
+            component={MapScreen}
+            options={{
               headerShown: false,
+              ...TransitionPresets.FadeFromBottomAndroid, // フェードアニメーションを設定
             }}
-          >
-            {/* スタート画面: ログインか新規登録を選択 */}
-            <Stack.Screen
-              name="LoginOrRegister"
-              component={LoginOrRegisterScreen}
-            />
+          />
 
-            {/* ログイン画面 */}
-            <Stack.Screen name="Login" component={LoginScreen} />
+          {/* プロフィール画面 */}
+          <Stack.Screen name="Profile" component={ProfileScreen} />
 
-            {/* 新規登録画面 */}
-            <Stack.Screen name="Registration" component={RegistrationScreen} />
-
-            {/* 説明画面 */}
-            <Stack.Screen name="Explanation" component={ExplanationScreen} />
-
-            {/* 注意書き画面 */}
-            <Stack.Screen name="Caution" component={CautionScreen} />
-
-            {/* マップ画面 */}
-            <Stack.Screen
-              name="Map"
-              component={MapScreen}
-              options={{
-                headerShown: false,
-                ...TransitionPresets.FadeFromBottomAndroid, // フェードアニメーションを設定
-              }}
-            />
-
-            {/* プロフィール画面 */}
-            <Stack.Screen name="Profile" component={ProfileScreen} />
-
-            {/* 録音画面 */}
-            <Stack.Screen
-              name="Record"
-              component={RecordScreen}
-              options={({ route }) => ({
-                title: route.params?.pointId ? "ポイントの録音" : "録音",
-              })}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </AudioProvider>
-    </LocationProvider>
+          {/* 録音画面 */}
+          <Stack.Screen
+            name="Record"
+            component={RecordScreen}
+            options={({ route }) => ({
+              title: route.params?.pointId ? "ポイントの録音" : "録音",
+            })}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </Provider>
   );
 };
 

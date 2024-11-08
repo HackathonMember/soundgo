@@ -17,15 +17,14 @@ import FFT from "fft.js";
 import base64js from "base64-js";
 import { FontAwesome } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import { LocationContext } from "../context/LocationContext";
+import { useDispatch } from "react-redux";
+import { addPoint } from "../store/pointSlice";
 
 const RecorderWithAnimation = ({ navigation }) => {
   // 録音状態の管理
   const [recording, setRecording] = useState(null);
   const [recordedURI, setRecordedURI] = useState("");
   const [isRecording, setIsRecording] = useState(false);
-
-  const { setLocation } = useContext(LocationContext); // コンテキストを利用
 
   const [errorMsg, setErrorMsg] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -39,6 +38,8 @@ const RecorderWithAnimation = ({ navigation }) => {
 
   // アニメーション用の参照
   const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const dispatch = useDispatch();
 
   // 録音ボタンのアニメーション設定
   useEffect(() => {
@@ -148,21 +149,11 @@ const RecorderWithAnimation = ({ navigation }) => {
           "録音が完了しました。保存ボタンを押してください。"
         );
 
-        // 位置情報を取得し、取得結果を使用する
-        const currentLocation = await getLocation();
-        if (currentLocation) {
-          console.log("取得した位置情報:", currentLocation);
-          // 位置情報をグローバルに設定
-          setLocation(currentLocation);
-        } else {
-          console.log("位置情報の取得に失敗しました。");
-        }
-
         // 周波数解析の実行
         const freqData = await getAudioFrequency(uri);
         if (freqData) {
           setFrequencies(freqData);
-          console.log("周波数データ:", freqData);
+          // console.log("周波数データ:", freqData);
           // ここで周波数データをUIに表示するなどの処理を追加できます
         } else {
           Alert.alert("解析エラー", "周波数解析に失敗しました。");
@@ -191,6 +182,36 @@ const RecorderWithAnimation = ({ navigation }) => {
           to: newPath,
         });
         Alert.alert("保存完了", "録音を保存しました: " + newPath);
+
+        try {
+          const { status } = await Location.requestForegroundPermissionsAsync();
+          if (status !== "granted") {
+            Alert.alert(
+              "許可が必要",
+              "位置情報のアクセスが許可されていません。"
+            );
+            return;
+          }
+          const loc = await Location.getCurrentPositionAsync({});
+          const { latitude, longitude } = loc.coords;
+          const currentDate = new Date();
+          const formattedDate = `${currentDate.getFullYear()}/${
+            currentDate.getMonth() + 1
+          }/${currentDate.getDate()} ${currentDate.getHours()}:${currentDate.getMinutes()}`;
+
+          dispatch(
+            addPoint({
+              latitude,
+              longitude,
+              recordedURI: newPath,
+              title: formattedDate,
+            })
+          );
+        } catch (error) {
+          console.error("位置情報取得エラー:", error);
+          Alert.alert("エラー", "位置情報の取得中にエラーが発生しました。");
+        }
+
         setRecordedURI(newPath);
       } catch (error) {
         console.error("保存エラー:", error);
@@ -313,38 +334,6 @@ const RecorderWithAnimation = ({ navigation }) => {
     } catch (error) {
       console.error("Error processing audio:", error);
       return null;
-    }
-  };
-
-  // 位置情報を取得して返す関数
-  const getLocation = async () => {
-    setLoading(true);
-    setErrorMsg(null);
-
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        const errorMessage = "位置情報のアクセスが許可されていません。";
-        setErrorMsg(errorMessage);
-        Alert.alert("許可が必要", errorMessage);
-        setLoading(false);
-        return null;
-      }
-      const loc = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = loc.coords;
-
-      const currentLocation = { latitude, longitude };
-      // グローバルな位置情報状態を更新
-      setLocation(currentLocation);
-      return currentLocation; // 取得した位置情報を返す
-    } catch (error) {
-      console.error("位置情報取得エラー:", error);
-      const errorMessage = "位置情報の取得中にエラーが発生しました。";
-      setErrorMsg(errorMessage);
-      Alert.alert("エラー", errorMessage);
-      return null;
-    } finally {
-      setLoading(false);
     }
   };
 

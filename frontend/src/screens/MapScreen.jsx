@@ -1,6 +1,4 @@
-// MapScreen.js
-
-import React, { useContext } from "react";
+import React from "react";
 import {
   StyleSheet,
   View,
@@ -11,12 +9,13 @@ import {
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { FontAwesome } from "@expo/vector-icons";
-import { LocationContext } from "../context/LocationContext";
+import { useSelector } from "react-redux";
+import { Audio } from "expo-av";
 
 const pin1Image = require("../../assets/pin1.png");
 const pin2Image = require("../../assets/pin2.png");
 
-const points = [
+const testPoints = [
   {
     id: 1,
     title: "ポイント1",
@@ -31,11 +30,10 @@ const points = [
     latitude: 35.6905,
     longitude: 139.6995,
   },
-  // 追加のポイント
 ];
 
 const MapScreen = ({ navigation }) => {
-  const { location, setLocation } = useContext(LocationContext); // コンテキストを利用
+  const points = useSelector((state) => state.point.points);
 
   const handleLogout = () => {
     Alert.alert("Logout Confirmation", "ログアウトしますか？", [
@@ -50,18 +48,37 @@ const MapScreen = ({ navigation }) => {
     ]);
   };
 
+  // 録音ファイルを再生
+  const playSound = async (recordedURI) => {
+    if (recordedURI) {
+      try {
+        console.log("再生を開始します");
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: recordedURI },
+          { shouldPlay: true }
+        );
+        sound.playAsync(); // 再生を開始
+      } catch (error) {
+        console.error("再生エラー:", error);
+        Alert.alert("再生エラー", error.message);
+      }
+    } else {
+      Alert.alert("エラー", "再生する録音ファイルが存在しません。");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <MapView
         style={styles.map}
         initialRegion={{
-          latitude: 37.785834, // 中心の緯度
-          longitude: -122.406417, // 中心の経度
-          latitudeDelta: 0.0922, // ズームレベル
+          latitude: 37.785834,
+          longitude: -122.406417,
+          latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
       >
-        {points.map((point) => (
+        {testPoints.map((point) => (
           <Marker
             key={point.id}
             coordinate={{
@@ -73,31 +90,30 @@ const MapScreen = ({ navigation }) => {
           >
             <Image
               source={point.id % 2 === 1 ? pin1Image : pin2Image}
-              style={{ width: 30, height: 40 }} // サイズを指定
+              style={{ width: 30, height: 40 }}
             />
           </Marker>
         ))}
-        {location && (
+        {points.map((point) => (
           <Marker
+            key={point.recordedURI}
             coordinate={{
-              latitude: location.latitude,
-              longitude: location.longitude,
+              latitude: point.latitude,
+              longitude: point.longitude,
             }}
-            // title="現在地"
-            pinColor="blue"
+            title={point.title}
+            description={"追加されました"}
+            onPress={() => playSound(point.recordedURI)} // クリック時に音声を再生
           >
-            <Image
-              source={pin2Image}
-              style={{ width: 30, height: 40 }} // サイズを指定
-            />
+            <Image source={pin2Image} style={{ width: 30, height: 40 }} />
           </Marker>
-        )}
+        ))}
       </MapView>
-      {/* 左上のログアウトボタン */}
+
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <FontAwesome name="sign-out" size={24} color="white" />
       </TouchableOpacity>
-      {/* 左下のプロフィールアイコン */}
+
       <TouchableOpacity
         style={styles.profileButton}
         onPress={() => navigation.navigate("Profile")}
@@ -105,7 +121,6 @@ const MapScreen = ({ navigation }) => {
         <FontAwesome name="user" size={40} color="white" />
       </TouchableOpacity>
 
-      {/* 右下の録音アイコン */}
       <TouchableOpacity
         style={styles.recordButton}
         onPress={() => navigation.navigate("Record")}

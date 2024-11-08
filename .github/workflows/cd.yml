@@ -87,19 +87,25 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.render-app-container.outputs.task-definition }}
+          run-task: true # タスクを実行
+          run-task-container-overrides: '[{"name": "soundgo", "command": ["flask", "db", "upgrade"]}]'
+          run-task-security-groups: '["sg-012ca51c550450a5d"]'
+          run-task-subnets: '["subnet-0a56214a722366ddd", "subnet-0f3b388677b3be3fc", "subnet-0138e1f7d9120a3c5"]'
+          wait-for-task-stopped: true # タスク完了まで待機
           service: soundgo
           cluster: soundgo-cluster
+          wait-for-service-stability: true
 
       # 11. Deploy to Amazon ECS service
-      - name: Run Migrations
-        id: run-task
-        uses: yyoshiki41/ecs-run-task-action@v0.0.9
-        with:
-          cluster: soundgo-cluster
-          task-definition: ${{ steps.migration-task-def.outputs.task-definition }}
-          task-definition-family: migrate
-          launch-type: "EC2"
-          subnets: '["subnet-0a56214a722366ddd", "subnet-0f3b388677b3be3fc", "subnet-0138e1f7d9120a3c5"]'
-          security-groups: '["sg-012ca51c550450a5d"]'
-          container-name: soundgo-migrate
-          command: '["sh", "-c", "flask db upgrade"]'
+      # - name: Run Migrations
+      #   id: run-task
+      #   uses: yyoshiki41/ecs-run-task-action@v0.0.9
+      #   with:
+      #     cluster: soundgo-cluster
+      #     task-definition: ${{ steps.migration-task-def.outputs.task-definition }}
+      #     task-definition-family: migrate
+      #     launch-type: "EC2"
+      #     subnets: '["subnet-0a56214a722366ddd", "subnet-0f3b388677b3be3fc", "subnet-0138e1f7d9120a3c5"]'
+      #     security-groups: '["sg-012ca51c550450a5d"]'
+      #     container-name: soundgo-migrate
+      #     command: '["sh", "-c", "flask db upgrade"]'

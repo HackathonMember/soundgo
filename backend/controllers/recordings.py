@@ -4,6 +4,7 @@ from io import BytesIO
 from logging import getLogger
 
 from flask import Blueprint, g, jsonify, request
+
 from models import Recording
 from models.s3 import S3
 
@@ -113,6 +114,7 @@ def get_recording_by_id(id):
             500,
         )
 
+
 @recordings.route("/", methods=["GET"])
 @login_required
 def get_recording():
@@ -122,7 +124,7 @@ def get_recording():
 
         # メソッドを呼び出して、録音データを取得
         recording_list = Recording.get_recordings_by_user_id(g.user.user_id)
-        
+
         # 録音が見つかった場合のみリスト化
         if recording_list:
             res = [
@@ -130,17 +132,21 @@ def get_recording():
                     "recording_id": record.id,
                     "recording_at": record.recorded_at,
                     "created_at": record.created_at,
-                } for record in recording_list
+                }
+                for record in recording_list
             ]
             return jsonify(res), 200
-        
+
         # 録音が見つからない場合
         return jsonify({"message": "録音が見つかりません"}), 404
 
     except Exception as e:
         # エラーメッセージと例外を記録
         logger.error(f"Error retrieving recording: {e}")
-        return jsonify({"message": "サーバーエラーが発生しました", "error": str(e)}), 500
+        return (
+            jsonify({"message": "サーバーエラーが発生しました", "error": str(e)}),
+            500,
+        )
 
 
 @recordings.route("/<id>", methods=["PUT"])

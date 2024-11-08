@@ -13,6 +13,8 @@ import { FontAwesome } from "@expo/vector-icons";
 const pin1Image = require("../../assets/pin1.png");
 const pin2Image = require("../../assets/pin2.png");
 
+import { logout } from "../api/user/logout";
+
 const points = [
   {
     id: 1,
@@ -33,17 +35,20 @@ const points = [
 
 const MapScreen = ({ navigation }) => {
   const handleLogout = () => {
-    Alert.alert("Logout Confirmation", "Are you sure you want to log out?", [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-      {
-        text: "Logout",
-        onPress: () => navigation.navigate("Login"),
-      },
-    ]);
-  };
+      Alert.alert("Logout Confirmation", "Are you sure you want to log out?", [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Logout",
+          onPress: async () => {
+            await logout();
+            navigation.navigate("Login");
+          },
+        },
+      ]);
+    };
 
   return (
     <View style={styles.container}>

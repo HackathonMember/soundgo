@@ -46,3 +46,10 @@ bash test_utils/create_s3.sh
 # テスト実行
 pytest tests/aws/test_s3.py
 ```
+
+#### フロントエンドとの接続確認
+`frontend/.env`ファイルを作成
+```
+API_BASE_URL=<URL>
+```
+としてください

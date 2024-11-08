@@ -1,8 +1,11 @@
 from datetime import datetime
 from functools import wraps
+from logging import getLogger
 
 from flask import g, jsonify, request
 from models import Session, User
+
+logger = getLogger(__name__)
 
 
 def login_required(f):
@@ -21,6 +24,7 @@ def login_required(f):
             return jsonify({"message": "Session expired or invalid"}), 401
         user = User.query.filter_by(user_id=session.user_id).first()
         if not user:
+            logger.error(f"User not found for session_id: {session_id}")
             return jsonify({"message": "User not found"}), 404
         g.user = user
         return f(*args, **kwargs)

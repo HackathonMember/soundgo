@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 
+import { login } from "../api/user/login";
+
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,7 +33,7 @@ const LoginScreen = ({ navigation }) => {
     }
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await login(email, password);
       setIsLoading(false);
       RNAlert.alert("Login Successful", "You have successfully logged in.", [
         { text: "OK", onPress: () => console.log("OK Pressed") },

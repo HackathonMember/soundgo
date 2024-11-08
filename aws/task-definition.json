@@ -11,6 +11,11 @@
         }
       ],
       "memory": 512
+    },
+    {
+      "name": "migration",
+      "image": "REPLACE_WITH_ECR_REPO_URI:latest",
+      "essential": false
     }
   ]
 }

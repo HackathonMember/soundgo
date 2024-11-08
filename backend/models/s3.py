@@ -26,3 +26,13 @@ class S3:
 
     def get_object(self, key):
         return self.bucket.Object(key)
+
+    def delete(self, key) -> bool:
+        try:
+            # S3からオブジェクトを削除
+            self.bucket.delete_objects(Delete={"Objects": [{"Key": key}]})
+            return True
+        except Exception as e:
+            # エラーが発生した場合
+            print(f"Error deleting object {key} from S3: {e}")
+            return False

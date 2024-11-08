@@ -11,7 +11,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         Session.delete_expired_sessions()
-        session_id = request.cookies.get("session_id")
+        session_id = request.cookies.get("Session-ID")
         if not session_id:
             return jsonify({"message": "Authentication required"}), 401
         session = Session.query.filter_by(session_id=session_id).first()

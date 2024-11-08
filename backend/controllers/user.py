@@ -1,11 +1,10 @@
 from logging import getLogger
 
-from flask import Blueprint, g, jsonify, make_response, request
-from werkzeug.security import generate_password_hash
-
 from controllers.utils.auth import login_required
 from controllers.utils.password import verify_password
+from flask import Blueprint, g, jsonify, make_response, request
 from models import Session, User
+from werkzeug.security import generate_password_hash
 
 logger = getLogger(__name__)
 

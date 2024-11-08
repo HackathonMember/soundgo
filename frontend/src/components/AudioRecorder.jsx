@@ -1,10 +1,10 @@
-// App.js
+// RecorderWithAnimation.js
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import {
   View,
   Button,
-  Text, // ここにTextを追加
+  Text,
   Alert,
   StyleSheet,
   ImageBackground,
@@ -14,14 +14,21 @@ import {
 import { Audio } from "expo-av";
 import * as FileSystem from "expo-file-system";
 import FFT from "fft.js";
-import base64js from "base64-js"; // base64-jsをインポート
+import base64js from "base64-js";
 import { FontAwesome } from "@expo/vector-icons";
+import * as Location from "expo-location";
+import { LocationContext } from "../context/LocationContext";
 
-const RecorderWithAnimation = () => {
+const RecorderWithAnimation = ({ navigation }) => {
   // 録音状態の管理
   const [recording, setRecording] = useState(null);
   const [recordedURI, setRecordedURI] = useState("");
   const [isRecording, setIsRecording] = useState(false);
+
+  const { setLocation } = useContext(LocationContext); // コンテキストを利用
+
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   // 再生状態の管理
   const [sound, setSound] = useState(null);
@@ -140,6 +147,16 @@ const RecorderWithAnimation = () => {
           "録音完了",
           "録音が完了しました。保存ボタンを押してください。"
         );
+
+        // 位置情報を取得し、取得結果を使用する
+        const currentLocation = await getLocation();
+        if (currentLocation) {
+          console.log("取得した位置情報:", currentLocation);
+          // 位置情報をグローバルに設定
+          setLocation(currentLocation);
+        } else {
+          console.log("位置情報の取得に失敗しました。");
+        }
 
         // 周波数解析の実行
         const freqData = await getAudioFrequency(uri);
@@ -299,6 +316,38 @@ const RecorderWithAnimation = () => {
     }
   };
 
+  // 位置情報を取得して返す関数
+  const getLocation = async () => {
+    setLoading(true);
+    setErrorMsg(null);
+
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        const errorMessage = "位置情報のアクセスが許可されていません。";
+        setErrorMsg(errorMessage);
+        Alert.alert("許可が必要", errorMessage);
+        setLoading(false);
+        return null;
+      }
+      const loc = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = loc.coords;
+
+      const currentLocation = { latitude, longitude };
+      // グローバルな位置情報状態を更新
+      setLocation(currentLocation);
+      return currentLocation; // 取得した位置情報を返す
+    } catch (error) {
+      console.error("位置情報取得エラー:", error);
+      const errorMessage = "位置情報の取得中にエラーが発生しました。";
+      setErrorMsg(errorMessage);
+      Alert.alert("エラー", errorMessage);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* 録音中に背景GIFを表示 */}
@@ -366,6 +415,29 @@ const RecorderWithAnimation = () => {
           </TouchableOpacity>
         </View>
       )}
+
+      {/* 位置情報の表示（オプション） */}
+      {/*
+      {location && (
+        <View style={styles.locationContainer}>
+          <Text style={styles.locationText}>
+            緯度: {location.latitude.toFixed(6)}
+          </Text>
+          <Text style={styles.locationText}>
+            経度: {location.longitude.toFixed(6)}
+          </Text>
+        </View>
+      )}
+      */}
+
+      {/* ローディング表示（オプション） */}
+      {/*
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>位置情報を取得中...</Text>
+        </View>
+      )}
+      */}
     </View>
   );
 };
@@ -425,5 +497,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginLeft: 5,
+  },
+  locationContainer: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    padding: 10,
+    borderRadius: 10,
+  },
+  locationText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  loadingContainer: {
+    position: "absolute",
+    top: 100,
+    left: 20,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    padding: 10,
+    borderRadius: 10,
+  },
+  loadingText: {
+    color: "#fff",
+    fontSize: 16,
   },
 });

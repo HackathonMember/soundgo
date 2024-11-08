@@ -1,4 +1,6 @@
-import React from "react";
+// MapScreen.js
+
+import React, { useContext } from "react";
 import {
   StyleSheet,
   View,
@@ -9,6 +11,7 @@ import {
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { FontAwesome } from "@expo/vector-icons";
+import { LocationContext } from "../context/LocationContext";
 
 const pin1Image = require("../../assets/pin1.png");
 const pin2Image = require("../../assets/pin2.png");
@@ -32,10 +35,12 @@ const points = [
 ];
 
 const MapScreen = ({ navigation }) => {
+  const { location, setLocation } = useContext(LocationContext); // コンテキストを利用
+
   const handleLogout = () => {
-    Alert.alert("Logout Confirmation", "Are you sure you want to log out?", [
+    Alert.alert("Logout Confirmation", "ログアウトしますか？", [
       {
-        text: "Cancel",
+        text: "キャンセル",
         style: "cancel",
       },
       {
@@ -50,8 +55,8 @@ const MapScreen = ({ navigation }) => {
       <MapView
         style={styles.map}
         initialRegion={{
-          latitude: 35.689456880143, // 中心の緯度
-          longitude: 139.6917294692, // 中心の経度
+          latitude: 37.785834, // 中心の緯度
+          longitude: -122.406417, // 中心の経度
           latitudeDelta: 0.0922, // ズームレベル
           longitudeDelta: 0.0421,
         }}
@@ -65,20 +70,33 @@ const MapScreen = ({ navigation }) => {
             }}
             title={point.title}
             description={point.description}
-            >
-              <Image
-                source={point.id % 2 === 1 ? pin1Image : pin2Image}
-                style={{ width: 30, height: 40 }} // サイズを指定
-              />
-            </Marker>
+          >
+            <Image
+              source={point.id % 2 === 1 ? pin1Image : pin2Image}
+              style={{ width: 30, height: 40 }} // サイズを指定
+            />
+          </Marker>
         ))}
+        {location && (
+          <Marker
+            coordinate={{
+              latitude: location.latitude,
+              longitude: location.longitude,
+            }}
+            // title="現在地"
+            pinColor="blue"
+          >
+            <Image
+              source={pin2Image}
+              style={{ width: 30, height: 40 }} // サイズを指定
+            />
+          </Marker>
+        )}
       </MapView>
-
       {/* 左上のログアウトボタン */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <FontAwesome name="sign-out" size={24} color="white" />
       </TouchableOpacity>
-
       {/* 左下のプロフィールアイコン */}
       <TouchableOpacity
         style={styles.profileButton}

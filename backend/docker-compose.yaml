@@ -25,7 +25,7 @@ services:
     volumes:
       - .:/app
     environment:
-      - DEBUG=1
+      - FLASK_DEBUG=1
       - STAGE=local
       - FLASK_ENV=development
       - DATABASE_URL=mysql+pymysql://user:password@soundgo-mysql/SOUNDGO

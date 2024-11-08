@@ -47,7 +47,7 @@ def signup():
         new_session, expires_at = Session.create_session(new_user.user_id)
         response = make_response(jsonify({"message": "ユーザー登録が完了しました"}))
         response.set_cookie(
-            "session_id",
+            "Session-ID",
             new_session.session_id,
             httponly=True,
             secure=True,
@@ -77,7 +77,7 @@ def login():
         new_session, expires_at = Session.create_session(user.user_id)
         response = make_response(jsonify({"message": "ログインしました"}))
         response.set_cookie(
-            "session_id",
+            "Session-ID",
             new_session.session_id,
             httponly=True,
             secure=True,
@@ -98,7 +98,7 @@ def logout():
 
         # クッキーの削除
         response = make_response(jsonify({"message": "ログアウトしました"}))
-        response.delete_cookie("session_id")
+        response.delete_cookie("Session-ID")
 
         return response, 200
     except Exception as e:

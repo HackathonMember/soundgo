@@ -1,4 +1,6 @@
 {
+  "family": "soundgo",
+  "networkMode": "awsvpc",
   "containerDefinitions": [
     {
       "name": "soundgo",

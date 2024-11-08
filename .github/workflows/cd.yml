@@ -72,7 +72,7 @@ jobs:
         with:
           task-definition: aws/task-definition.json
           container-name: soundgo
-          image: latest
+          image: soundgo:latest
 
       # Run migration task
       - name: Run Migrations

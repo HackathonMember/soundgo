@@ -3,7 +3,7 @@
     {
       "name": "soundgo",
       "image": "REPLACE_WITH_ECR_REPO_URI:latest",
-      "essential": false,
+      "essential": true,
       "dependsOn": [
         {
           "containerName": "",

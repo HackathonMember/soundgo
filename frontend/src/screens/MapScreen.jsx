@@ -94,6 +94,15 @@ const MapScreen = ({ navigation }) => {
       >
         <FontAwesome name="microphone" size={40} color="white" />
       </TouchableOpacity>
+
+        {/* 右下の録音アイコン */}
+      <TouchableOpacity
+        style={styles.gameButton}
+        onPress={() => navigation.navigate("Game")}
+      >
+        <FontAwesome name="gamepad" size={40} color="white" />
+      </TouchableOpacity>
+
     </View>
   );
 };
@@ -138,4 +147,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  gameButton: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    backgroundColor: "#5f347d",
+    padding: 12,
+    borderRadius: 30,
+    alignItems: "center",
+    justifyContent: "center",
+  }
 });

@@ -1,0 +1,20 @@
+{
+"containerDefinitions": [
+    {
+      "name": "soundgo-migration",
+      "image": "REPLACE_WITH_ECR_REPO_URI:latest",
+      "essential": true,
+      "dependsOn":[
+        {
+          "containerName":"",
+          "condition":"SUCCESS"
+        }
+      ]
+    },
+    {
+      "name":"migration",
+      "image":"REPLACE_WITH_ECR_REPO_URI:latest",
+      "essential":false
+   }
+  ]
+}

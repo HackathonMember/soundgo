@@ -15,7 +15,8 @@
     {
       "name": "migration",
       "image": "REPLACE_WITH_ECR_REPO_URI:latest",
-      "essential": false
+      "essential": false,
+      "memory": 512
     }
   ]
 }

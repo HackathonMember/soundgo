@@ -106,7 +106,12 @@ paths:
       security:
         - SessionID: []
       parameters:
-        - $ref: '#/components/parameters/RecordingId'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 更新する録音のID
       requestBody:
         required: true
         content:
@@ -193,7 +198,7 @@ components:
       properties:
         audio:
           type: string
-          format: binary
+          format: binary  # バイナリ形式で音声ファイルを受け取る
         date_recorded:
           type: string
           format: date-time

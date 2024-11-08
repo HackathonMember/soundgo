@@ -60,6 +60,14 @@ jobs:
         run: |
           aws ecs describe-task-definition --task-definition soundgo --query taskDefinition > task-definition.json
 
+      - name: Render Amazon ECS app task definition with app container
+        id: render-app-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v2
+        with:
+          task-definition: task-definition.json
+          container-name: soundgo
+          image: ${{ steps.build-image-app.outputs.image }}
+
       - name: Deploy to ECS
         env:
           ECR_REPO_URI: ${{ secrets.ECR_REPO_URI }}
@@ -78,7 +86,7 @@ jobs:
       - name: Deploy to Amazon ECS service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: task-definition.json
+          task-definition: ${{ steps.render-app-container.outputs.task-definition }}
           service: soundgo
           cluster: soundgo-cluster
 

@@ -7,7 +7,7 @@
       "image": "REPLACE_WITH_ECR_REPO_URI:latest",
       "essential": true,
       "memory": 512,
-      "cpu": 512,
+      "cpu": 512
     }
   ]
 }

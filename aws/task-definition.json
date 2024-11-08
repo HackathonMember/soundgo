@@ -1,9 +1,9 @@
 {
-  "family": "soundgo",
+  "family": "migrate",
   "networkMode": "awsvpc",
   "containerDefinitions": [
     {
-      "name": "soundgo",
+      "name": "migrate",
       "image": "soundgo:latest",
       "essential": true,
       "memory": 512,

@@ -3,7 +3,6 @@ from functools import wraps
 from logging import getLogger
 
 from flask import g, jsonify, request
-
 from models import Session, User
 
 logger = getLogger(__name__)

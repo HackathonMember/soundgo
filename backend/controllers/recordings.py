@@ -4,7 +4,6 @@ from io import BytesIO
 from logging import getLogger
 
 from flask import Blueprint, g, jsonify, request
-
 from models import Recording
 from models.s3 import S3
 

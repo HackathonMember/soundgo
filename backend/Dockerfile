@@ -1,5 +1,5 @@
-# ベースイメージを指定
-FROM python:3.10
+# ベースイメージを指定（ビルドステージ）
+FROM python:3.10 AS builder
 
 # 作業ディレクトリを設定
 WORKDIR /app
@@ -16,10 +16,28 @@ ENV PATH="/root/.local/bin:$PATH"
 # 必要なファイルをコピー
 COPY pyproject.toml poetry.lock ./
 
+RUN poetry export --without-hashes -f requirements.txt > requirements.txt
+RUN poetry export --without-hashes --dev -f requirements.txt > requirements-dev.txt
+RUN pip install -r requirements.txt
+
 # Poetryで依存関係をインストール
-RUN poetry install
+RUN if [ "$ENVIRONMENT" = "local" ]; then \
+    pip install -r requirements-dev.txt; \
+    fi
 
 # Flaskアプリケーションのコードをコピー
 COPY . .
+
+# 最終イメージ
+FROM python:3.10-slim
+
+# 作業ディレクトリを設定
+WORKDIR /app
+
+# 必要なファイルをコピー（依存関係のみ）
+COPY --from=builder /app /app
+
+# 環境変数設定
+ENV PATH="/root/.local/bin:$PATH"
 
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]

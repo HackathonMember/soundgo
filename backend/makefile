@@ -2,8 +2,8 @@ all: build up
 build:
 	docker compose build --no-cache
 up:
-	docker compose up -d 
-	while [ 1 ]; do;sleep 3; sudo make migrate && make bash ;done;
+	docker compose up -d
+	sleep 30; make migrate && make bash
 
 down:
 	docker compose down -v

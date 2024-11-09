@@ -1,9 +1,10 @@
 import logging
 import os
 
+from flask import Flask
+
 from controllers.recordings import recordings
 from controllers.user import user
-from flask import Flask
 from models.database import init_db
 
 logging.basicConfig(level=logging.INFO)

@@ -49,5 +49,4 @@ RUN if [ "$ENVIRONMENT" = "local" ]; then \
 # 環境変数設定
 ENV PATH="/root/.local/bin:$PATH"
 
-# CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
-CMD ["bash", "-c", "while :; do sleep 10; done"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]

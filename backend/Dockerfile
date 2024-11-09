@@ -16,17 +16,11 @@ ENV PATH="/root/.local/bin:$PATH"
 # 必要なファイルをコピー
 COPY pyproject.toml poetry.lock ./
 
-RUN poetry export --without-hashes -f requirements.txt > requirements.txt
-RUN poetry export --without-hashes --dev -f requirements.txt > requirements-dev.txt
-RUN pip install -r requirements.txt
-
-# Poetryで依存関係をインストール
-RUN if [ "$ENVIRONMENT" = "local" ]; then \
-    pip install -r requirements-dev.txt; \
-    fi
-
 # Flaskアプリケーションのコードをコピー
 COPY . .
+
+RUN poetry export -f requirements.txt -o requirements.txt --without-hashes
+RUN poetry export -f requirements.txt -o requirements.txt --without-hashes --with dev
 
 # 最終イメージ
 FROM python:3.10-slim
@@ -37,7 +31,23 @@ WORKDIR /app
 # 必要なファイルをコピー（依存関係のみ）
 COPY --from=builder /app /app
 
+RUN apt-get update && \
+    apt-get install build-essential pkg-config libmariadb-dev-compat libmariadb-dev -y && \
+    pip install --upgrade pip && \
+    pip install -r requirements.txt && \
+    rm -rf /root/.cache && \
+    apt-get remove -y build-essential && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Poetryで依存関係をインストール
+RUN if [ "$ENVIRONMENT" = "local" ]; then \
+    pip install -r requirements-dev.txt; \
+    fi
+
 # 環境変数設定
 ENV PATH="/root/.local/bin:$PATH"
 
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+# CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+CMD ["bash", "-c", "while :; do sleep 10; done"]

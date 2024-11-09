@@ -85,8 +85,8 @@ const Activity = () => {
         <View style={{ height: 32 }} />
 
         <Text style={styles.activityText}>Activity</Text>
-        <Text style={styles.activityText}>Number of sounds collected 7</Text>
-        <Text style={styles.activityText}>The Day I started 10/02</Text>
+        <Text style={styles.activityText}>Number of sounds collected 2</Text>
+        <Text style={styles.activityText}>The Day I started 11/09</Text>
 
         <View style={{ height: 32 }} />
 
